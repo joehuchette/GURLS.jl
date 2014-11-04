@@ -2,6 +2,10 @@ module GURLS
 
 using MLBase
 
+export AbstractProcess, Experiment, AbstractTask, Kernel, Linear, RLS, Primal,
+       Dual, Paramsel, LOOCV, Pred, Perf, Conf, TrainingProcess, 
+       PredictionProcess, PerformanceProcess, ConfidenceProcess
+
 ###############################################################################
 # AbstractProcess: Abstract type for a process in the experiment 
 #                  (e.g. training, testing)
@@ -11,8 +15,9 @@ abstract AbstractProcess
 # Experiment: Pipeline for a series of processes (training, testing, etc.)
 type Experiment
     pipeline::Vector{AbstractProcess}
+    options
 end
-Experiment() = Experiment(AbstractProcess[])
+Experiment() = Experiment(AbstractProcess[],nothing)
 
 push!{P<:AbstractProcess}(x::Experiment,y::P) = push!(x.pipeline,y)
 
@@ -59,8 +64,8 @@ end
 function TrainingProcess(X, y; kernel   = Linear,
                                paramsel = LOOCV,
                                rls      = Primal)
-    verify_parameters(kernel,paramsel,optimizer)
-    TrainingProcess{kernel,paramsel,rls,optimizer}(X,y)
+    verify_parameters(kernel,paramsel,rls)
+    TrainingProcess{kernel,paramsel,rls}(X,y)
 end
 
 ###############################################################################
@@ -83,6 +88,16 @@ end
 type ConfidenceProcess <: AbstractProcess
     pred::PredictionProcess
     conf::Vector{Conf}
+end
+
+###############################################################################
+# Internal routine that verifies that a given procedure makes sense: that is,
+# that the specified configuration is supported
+const supported_classes = [
+    (Linear,LOOCV,Primal)
+]
+function verify_parameters(kernel,paramsel,rls)
+    (kernel,paramsel,rls) in supported_classes || error("Given training routine is not supported")
 end
 
 end
