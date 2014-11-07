@@ -46,14 +46,6 @@ abstract Perf
 abstract Conf
 
 ###############################################################################
-# SplittingProcess: Internal task used in hold-out validation (may be better 
-#                   idea to roll into that)
-type SplittingProcess <: AbstractProcess
-    nholdouts::Int
-    holdoutprop::Float64
-end
-
-###############################################################################
 # TrainingProcess: Procedure to train data (X,y) using a given kernel, 
 #                  parameter selection procedure, and formulation type
 type TrainingProcess{K<:Kernel,P<:Paramsel,T<:RLS} <: AbstractProcess
