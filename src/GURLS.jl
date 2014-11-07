@@ -1,10 +1,11 @@
 module GURLS
 
-using MLBase
+using Base
 
 export AbstractProcess, Experiment, AbstractTask, Kernel, Linear, RLS, Primal,
        Dual, Paramsel, LOOCV, Pred, Perf, Conf, TrainingProcess, 
-       PredictionProcess, PerformanceProcess, ConfidenceProcess
+       PredictionProcess, PerformanceProcess, ConfidenceProcess,
+       process,predict
 
 ###############################################################################
 # AbstractProcess: Abstract type for a process in the experiment 
@@ -51,13 +52,15 @@ abstract Conf
 type TrainingProcess{K<:Kernel,P<:Paramsel,T<:RLS} <: AbstractProcess
     X
     y
+    nLambda::Int # the number of guesses for lambda we should have
 end
 
 function TrainingProcess(X, y; kernel   = Linear,
                                paramsel = LOOCV,
-                               rls      = Primal)
+                               rls      = Primal,
+                               nLambda = 100) # can maybe pick intelligentlly later
     verify_parameters(kernel,paramsel,rls)
-    TrainingProcess{kernel,paramsel,rls}(X,y)
+    return TrainingProcess{kernel,paramsel,rls}(X,y,nLambda)
 end
 
 ###############################################################################
@@ -92,4 +95,33 @@ function verify_parameters(kernel,paramsel,rls)
     (kernel,paramsel,rls) in supported_classes || error("Given training routine is not supported")
 end
 
+
+
+##############################################################################
+# Type to hold the results of an abstract process
+abstract AbstractResults
+
+##############################################################################
+# Main routine that processes an experiment.
+function process(e::Experiment)
+	results = Array{AbstractResults}
+	for task in e.pipeline
+		push!(results,process(task))
+	end
 end
+
+# Catch-all for undefined processes
+process{T<:AbstractProcess}(task::T) = error("Operation not defined for type $(typeof(task)).")
+
+##############################################################################
+
+include("model.jl")
+include("validation.jl")
+include("paramsel.jl")
+
+
+
+
+
+
+end # Module
