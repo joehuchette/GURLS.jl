@@ -19,29 +19,27 @@ r = rank(train.X)
 lmax = eigs[1]
 lmin = max(min(lmax * 1e-8, eigs[r]),200*sqrt(eps()))
 
-powers = linspace(0,1,train.nLambda)
+powers = linspace(0,1,train.options.nLambda)
 guesses = lmin.*(lmax/lmin).^(powers)
 guesses = guesses/n
 
 
 # pre-allocate memory
-performance = zeros(train.nLambda)
-ws = zeros(train.nLambda,d) # list of fitted values for w's
-model = LinearModel(zeros(d,1)) 
+performance = zeros(train.options.nLambda)
 
 # Test all values for lambda
 i = 1
 for lambda in guesses
-	model.w = inv(XX + lambda * eye(d)) * train.X' * train.y
-	ws[i,:] = model.w
-	performance[i] = LOOCV(model,train.X,train.y)
-	ws[i,:] = model.w 
+	performance[i] = LOOCV(train,lambda)
 	i += 1
 end
 
-# Find the best one and return results
+# Find the best value for lambda
 (notused,best) = findmin(performance)
-model.w = ws[best,:]'
+lambdaBest = guesses[best]
+
+# Build the final model-- might as well use all of the training set.
+model = buildModel(train,lambdaBest)
 
 results = ParamselResults(model,guesses,performance)
 return results

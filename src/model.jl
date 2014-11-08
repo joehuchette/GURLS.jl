@@ -14,3 +14,8 @@ end
 function predict(model::LinearModel,X)
 	return X' * model.w
 end
+
+function buildModel{T<:Real}(train::TrainingProcess{Linear,LOOCV,Primal},lambda::T)
+	w = inv(train.X' * train.X + lambda * eye(size(train.X,2))) * train.X' * train.y
+	return LinearModel(w)
+end

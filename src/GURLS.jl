@@ -1,11 +1,11 @@
 module GURLS
 
-using Base
+importall Base
 
 export AbstractProcess, Experiment, AbstractTask, Kernel, Linear, RLS, Primal,
        Dual, Paramsel, LOOCV, Pred, Perf, Conf, TrainingProcess, 
        PredictionProcess, PerformanceProcess, ConfidenceProcess,
-       process,predict
+       process,predict,push!
 
 ###############################################################################
 # AbstractProcess: Abstract type for a process in the experiment 
@@ -47,20 +47,28 @@ abstract Perf
 abstract Conf
 
 ###############################################################################
+# Classes to hold options for model building
+
+abstract AbstractOptions
+
+type LinearOptions <: AbstractOptions
+	nLambda::Int
+end
+
+###############################################################################
 # TrainingProcess: Procedure to train data (X,y) using a given kernel, 
 #                  parameter selection procedure, and formulation type
 type TrainingProcess{K<:Kernel,P<:Paramsel,T<:RLS} <: AbstractProcess
     X
     y
-    nLambda::Int # the number of guesses for lambda we should have
+    options::AbstractOptions # hold parameters for model building-- ie nLambda
 end
 
 function TrainingProcess(X, y; kernel   = Linear,
                                paramsel = LOOCV,
-                               rls      = Primal,
-                               nLambda = 100) # can maybe pick intelligentlly later
-    verify_parameters(kernel,paramsel,rls)
-    return TrainingProcess{kernel,paramsel,rls}(X,y,nLambda)
+                               rls      = Primal)
+    options = get_options(kernel,paramsel,rls)
+    return TrainingProcess{kernel,paramsel,rls}(X,y,options)
 end
 
 ###############################################################################
@@ -85,16 +93,21 @@ type ConfidenceProcess <: AbstractProcess
     conf::Vector{Conf}
 end
 
+
 ###############################################################################
 # Internal routine that verifies that a given procedure makes sense: that is,
-# that the specified configuration is supported
-const supported_classes = [
-    (Linear,LOOCV,Primal)
-]
-function verify_parameters(kernel,paramsel,rls)
-    (kernel,paramsel,rls) in supported_classes || error("Given training routine is not supported")
-end
+# that the specified configuration is supported and returns the matching options structure
 
+function get_options(kernel,paramsel,rls)
+    parameters = (kernel,paramsel,rls)
+
+    # Switch, case
+    if parameters == (Linear,LOOCV,Primal)
+    	return LinearOptions(100) # can pick nLambda intelligently later
+    else
+    	error("Given training routine is not supported")
+    end
+end
 
 
 ##############################################################################
@@ -104,10 +117,12 @@ abstract AbstractResults
 ##############################################################################
 # Main routine that processes an experiment.
 function process(e::Experiment)
-	results = Array{AbstractResults}
+	results = Array(AbstractResults,length(e.pipeline))
+	i = 1
 	for task in e.pipeline
-		push!(results,process(task))
+		results[i] = process(task)
 	end
+	return results
 end
 
 # Catch-all for undefined processes
