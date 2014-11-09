@@ -67,7 +67,10 @@ end
 function TrainingProcess(X, y; kernel   = Linear,
                                paramsel = LOOCV,
                                rls      = Primal)
-    options = get_options(kernel,paramsel,rls)
+    options = get_options(kernel(),paramsel(),rls()) # need to actually call constructors,
+    												 # otherwise it passes the datatypes 
+    												 # themselves, which can't be used for 
+    												 # comparison, type hierarchy, etc
     return TrainingProcess{kernel,paramsel,rls}(X,y,options)
 end
 
@@ -95,19 +98,15 @@ end
 
 
 ###############################################################################
-# Internal routine that verifies that a given procedure makes sense: that is,
-# that the specified configuration is supported and returns the matching options structure
+# Returns the desired options structure based on types given--- also serves to 
+# validate inputs
 
-function get_options(kernel,paramsel,rls)
-    parameters = (kernel,paramsel,rls)
+# catch-all, runs if less-specific case is available.
+get_options{K<:Kernel, P <: Paramsel, R <: RLS}(kernal::K,paramsel::P,rls::R) = 
+    error("Given training routine is not supported")
 
-    # Switch, case
-    if parameters == (Linear,LOOCV,Primal)
-    	return LinearOptions(100) # can pick nLambda intelligently later
-    else
-    	error("Given training routine is not supported")
-    end
-end
+get_options(kernel::Linear,paramsel::LOOCV,rls::Primal) =
+    LinearOptions(100) # can pick nLambda intelligently later
 
 
 ##############################################################################
