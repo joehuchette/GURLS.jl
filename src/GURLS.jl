@@ -5,12 +5,22 @@ importall Base
 export AbstractProcess, Experiment, AbstractTask, Kernel, Linear, RLS, Primal,
        Dual, Paramsel, LOOCV, Pred, Perf, Conf, TrainingProcess, 
        PredictionProcess, PerformanceProcess, ConfidenceProcess,
-       process,predict,push!
+       process,predict,push!,
+       print,show
 
 ###############################################################################
 # AbstractProcess: Abstract type for a process in the experiment 
 #                  (e.g. training, testing)
 abstract AbstractProcess
+
+function print(io::IO,res::AbstractProcess)
+	print(io,"$(typeof(res)) with:\n")
+	fields = names(res)
+	for field in fields
+		print(io,"\t$(field): $(typeof(res.(field)))\n")
+	end
+end
+show(io::IO,res::AbstractProcess) = print(io,res)
 
 ###############################################################################
 # Experiment: Pipeline for a series of processes (training, testing, etc.)
@@ -51,6 +61,15 @@ abstract Conf
 
 abstract AbstractOptions
 
+function print(io::IO,res::AbstractOptions)
+	print(io,"$(typeof(res)) with:\n")
+	fields = names(res)
+	for field in fields
+		print(io,"\t$(field): $(res.(field))\n")
+	end
+end
+show(io::IO,res::AbstractOptions) = print(io,res)
+
 type LinearOptions <: AbstractOptions
 	nLambda::Int
 end
@@ -73,6 +92,8 @@ function TrainingProcess(X, y; kernel   = Linear,
     												 # comparison, type hierarchy, etc
     return TrainingProcess{kernel,paramsel,rls}(X,y,options)
 end
+
+
 
 ###############################################################################
 # PredictionProcess: Procedure to predict on test data, given a training run
@@ -112,6 +133,15 @@ get_options(kernel::Linear,paramsel::LOOCV,rls::Primal) =
 ##############################################################################
 # Type to hold the results of an abstract process
 abstract AbstractResults
+
+function print(io::IO,res::AbstractResults)
+	print(io,"$(typeof(res)) with:\n")
+	fields = names(res)
+	for field in fields
+		print(io,"\t$(field): $(typeof(res.(field)))\n")
+	end
+end
+show(io::IO,res::AbstractResults) = print(io,res)
 
 ##############################################################################
 # Main routine that processes an experiment.
