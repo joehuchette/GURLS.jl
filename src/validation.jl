@@ -1,27 +1,22 @@
-function LOOCV{T<:TrainingProcess}(train::T,lambda,args...)
-	# Zach, you fill in here! Look at the model.jl file for model building/testing functions. 
+import MLBase
+
+
+function validate{T,S}(train::TrainingProcess{T,LOOCV,S},lambda::Real,args...)
 	# args is an array of arguments we'll need to build the models. For linear, this will
 	# contain one argument, the value for lambda. 
-	
 	n=size(train.X,1)
-	sse = 0.0
 
-	for i in 1:n
-		if i==1
-			Xmod = train.X[2:end,:]
-			ymod = train.y[2:end]
-		elseif i==n
-			Xmod = train.X[1:end-1,:]
-			ymod = train.y[1:end-1]
-		else
-			Xmod = train.X[[1:i-1,i+1:end],:]
-			ymod = train.y[[1:i-1,i+1:end]]
-		end
-
-		tp=TrainingProcess(Xmod, ymod; kernel=Linear, paramsel=LOOCV, rls=Primal)
-		submodel = buildModel(tp,lambda)
-		sse += (predict(submodel,train.X[i,:])[1] - train.y[i])^2
+	function linearEst(train_inds)
+		return buildModel(TrainingProcess(train.X[[train_inds],:], train.y[train_inds]; kernel=Linear, paramsel=LOOCV, rls=Primal),lambda)
 	end
 
-	return sse/n
+	function evalSSE(model, test_inds)
+		error_vec = predict(model,train.X[[test_inds],:]) - train.y[test_inds]
+		return sum(error_vec.*error_vec)
+	end
+
+	scores = MLBase.cross_validate(linearEst,evalSSE,n,MLBase.LOOCV(n))
+
+	return sum(scores)/n
+
 end
