@@ -2,7 +2,6 @@ function buildKernel(data::TrainingProcess{Linear,LOOCV,Dual})
 	(n,d) = size(data.X)
 	k = zeros(n,n)
 
-	println(k[1,1])
 	# Only calculuate bottom half of matrix
 	for i in 1:n
 		for j in 1:i

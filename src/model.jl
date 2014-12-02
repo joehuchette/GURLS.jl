@@ -35,10 +35,8 @@ function buildModel{P<:Paramsel}(train::TrainingProcess{Linear,P,Dual},lambda::R
 
 	cholfact!(K)
 
-	println(size(K))
+	w = train.X' * (K\(K'\train.y))
 
-	w = train.X' * K\(K'\train.y)
-
-	return LinearModel(k)
+	return LinearModel(vec(w))
 
 end
