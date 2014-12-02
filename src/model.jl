@@ -7,12 +7,12 @@ predict{T<:AbstractModel}(model::T) =
 
 ##############################################################################
 # Linear model definition and building
-type LinearModel <: AbstractModel
-	w::Array{Real,2} # should be 2D to avoid recasting in eval method below
+type LinearModel{T<:Real} <: AbstractModel
+	w::Array{T,1} # should be 2D to avoid recasting in eval method below
 end
 
 function predict(model::LinearModel,X)
-	return X' * model.w
+	return X * model.w
 end
 
 function buildModel{P<:Paramsel}(train::TrainingProcess{Linear,P,Primal},lambda::Real)
@@ -24,5 +24,5 @@ function buildModel{P<:Paramsel}(train::TrainingProcess{Linear,P,Primal},lambda:
 	cholfact!(XtX)
 	w = XtX\(XtX'\Xty)
 
-	return LinearModel(w)
+	return LinearModel(vec(w))
 end
