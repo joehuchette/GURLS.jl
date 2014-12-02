@@ -43,13 +43,13 @@ type Linear <: Kernel end
 
 ###############################################################################
 # RLS: Formulation type used in prediction
-abstract RLS
+abstract RLS <: AbstractTask
 type Primal <: RLS end
 type Dual <: RLS end
 
 ###############################################################################
 # Paramsel: Parameter selection procedure used
-abstract Paramsel
+abstract Paramsel <: AbstractTask
 type LOOCV <: Paramsel end
 
 abstract Pred
@@ -129,6 +129,9 @@ get_options{K<:Kernel, P <: Paramsel, R <: RLS}(kernal::K,paramsel::P,rls::R) =
 get_options(kernel::Linear,paramsel::LOOCV,rls::Primal) =
     LinearOptions(100) # can pick nLambda intelligently later
 
+get_options(kernel::Linear,paramsel::LOOCV,rls::Dual) =
+	LinearOptions(100)
+
 
 ##############################################################################
 # Type to hold the results of an abstract process
@@ -159,6 +162,7 @@ process{T<:AbstractProcess}(task::T) = error("Operation not defined for type $(t
 
 ##############################################################################
 
+include("kernel.jl")
 include("model.jl")
 include("validation.jl")
 include("paramsel.jl")

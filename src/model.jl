@@ -26,3 +26,19 @@ function buildModel{P<:Paramsel}(train::TrainingProcess{Linear,P,Primal},lambda:
 
 	return LinearModel(vec(w))
 end
+
+function buildModel{P<:Paramsel}(train::TrainingProcess{Linear,P,Dual},lambda::Real)
+
+	n = size(train.X,1)
+
+	K = buildKernel(train) + n * lambda * eye(n)
+
+	cholfact!(K)
+
+	println(size(K))
+
+	w = train.X' * K\(K'\train.y)
+
+	return LinearModel(k)
+
+end

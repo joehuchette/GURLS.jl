@@ -7,7 +7,7 @@ type ParamselResults <: AbstractResults
 end
 
 ##############################################################################
-function process(train::TrainingProcess{Linear,LOOCV,Primal})
+function process{R<:RLS}(train::TrainingProcess{Linear,LOOCV,R})
 XX = train.X' * train.X
 (n,d) = size(train.X)
 
@@ -30,7 +30,7 @@ performance = zeros(train.options.nLambda)
 # Test all values for lambda
 i = 1
 for lambda in guesses
-	performance[i] = LOOCV(train,lambda)
+	performance[i] = validate(train,lambda)
 	i += 1
 end
 
