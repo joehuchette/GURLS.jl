@@ -153,6 +153,7 @@ function process(e::Experiment)
 	i = 1
 	for task in e.pipeline
 		results[i] = process(task)
+		i += 1
 	end
 	return results
 end
@@ -166,10 +167,6 @@ include("kernel.jl")
 include("model.jl")
 include("validation.jl")
 include("paramsel.jl")
-
-
-
-
 
 
 end # Module
