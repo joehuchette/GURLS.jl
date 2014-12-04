@@ -7,6 +7,7 @@ type ParamselResults <: AbstractResults
 end
 
 ##############################################################################
+
 function process(train::TrainingProcess{Linear,LOOCV,Primal})
 	XX = train.X' * train.X
 	Xy = train.X' * train.y
@@ -23,38 +24,38 @@ end
 
 function process{Kern<:Kernel}(train::TrainingProcess{Kern,LOOCV,Dual})
 
-(n,d) = size(train.X)
+	(n,d) = size(train.X)
 
-K = buildKernel(train)
+	K = buildKernel(train)
 
-# Compute the eigenfactorization of K
-(L,Q) = eig(K)
-r = rank(train.X)
-Qy = Q' * train.y
+	# Compute the eigenfactorization of K
+	(L,Q) = eig(K)
+	r = rank(train.X)
+	Qy = Q' * train.y
 
-guesses = getLambdaGuesses(L,r,n,train.options.nLambda)
+	guesses = getLambdaGuesses(L,r,n,train.options.nLambda)
 
-# pre-allocate memory
-performance = zeros(train.options.nLambda)
+	# pre-allocate memory
+	performance = zeros(train.options.nLambda)
 
-# Test all values for lambda
-i = 1
-for lambda in guesses
-	# performance[i] = validate(train,lambda)
-	performance[i] = validateDual(Q,L,Qy,lambda,train.y)
-	println(performance[i])
-	i += 1
-end
+	# Test all values for lambda
+	i = 1
+	for lambda in guesses
+		# performance[i] = validate(train,lambda)
+		performance[i] = validateDual(Q,L,Qy,lambda,train.y)
+		println(performance[i])
+		i += 1
+	end
 
-# Find the best value for lambda
-(notused,best) = findmin(performance)
-lambdaBest = guesses[best]
+	# Find the best value for lambda
+	(notused,best) = findmin(performance)
+	lambdaBest = guesses[best]
 
-# Build the final model-- might as well use all of the training set.
-model = buildModel(train,lambdaBest,K)
+	# Build the final model-- might as well use all of the training set.
+	model = buildModel(train,lambdaBest,K)
 
-results = ParamselResults(model,guesses,performance)
-return results
+	results = ParamselResults(model,guesses,performance)
+	return results
 end
 
 validateDual(x,y,z,w,v) = 0
