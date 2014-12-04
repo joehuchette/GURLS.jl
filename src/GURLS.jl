@@ -157,6 +157,7 @@ function process(e::Experiment)
 	return results
 end
 
+include("utils.jl")
 include("kernel.jl")
 include("model.jl")
 include("validation.jl")
