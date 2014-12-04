@@ -13,10 +13,11 @@ export AbstractProcess, Experiment, AbstractTask, Kernel, Linear, RLS, Primal,
 abstract AbstractProcess
 
 function Base.print(io::IO,res::AbstractProcess)
-	print(io,"$(typeof(res)) with:\n")
+	print(io,"$(typeof(res)) with:")
 	fields = names(res)
 	for field in fields
-		print(io,"\t$(field): $(typeof(res.(field)))\n")
+        println(io)
+		print(io,"\t$(field): $(typeof(res.(field)))")
 	end
 end
 Base.show(io::IO,res::AbstractProcess) = print(io,res)
@@ -62,10 +63,11 @@ abstract Conf <: AbstractTask
 abstract AbstractOptions
 
 function Base.print(io::IO,res::AbstractOptions)
-	print(io,"$(typeof(res)) with:\n")
+	print(io,"$(typeof(res)) with:")
 	fields = names(res)
 	for field in fields
-		print(io,"\t$(field): $(res.(field))\n")
+        println(io)
+		print(io,"\t$(field): $(res.(field))")
 	end
 end
 Base.show(io::IO,res::AbstractOptions) = print(io,res)
@@ -137,10 +139,11 @@ get_options(::Linear,::LOOCV,::Dual) =
 abstract AbstractResults
 
 function Base.print(io::IO,res::AbstractResults)
-	print(io,"$(typeof(res)) with:\n")
+	print(io,"$(typeof(res)) with:")
 	fields = names(res)
 	for field in fields
-		print(io,"\t$(field): $(typeof(res.(field)))\n")
+        println(io)
+		print(io,"\t$(field): $(typeof(res.(field)))")
 	end
 end
 Base.show(io::IO,res::AbstractResults) = print(io,res)
