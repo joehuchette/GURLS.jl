@@ -32,6 +32,17 @@ function process(train::TrainingProcess{Linear,LOOCV,Primal})
 		i += 1
 	end
 
+		# Find the best value for lambda
+	(notused,best) = findmin(performance)
+	lambdaBest = guesses[best]
+
+	# Build the final model-- might as well use all of the training set.
+	println("Lambdabest = $lambdaBest")
+	model = buildModel(train,lambdaBest)
+
+	results = ParamselResults(model,guesses,performance)
+	return results
+
 end
 
 
