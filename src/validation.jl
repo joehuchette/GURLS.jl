@@ -40,7 +40,7 @@ function validateDual(Q,L,Qy,lambda,y)
 
 	n, T = size(y)
 
-	C = rls_eigen(Q,L,lambda,n)
+	C = rls_eigen(Q,L,Qy,lambda,n)
 	Z = GInverseDiagonal(Q,L,lambda)
 
 	perf = zeros(n,t)
