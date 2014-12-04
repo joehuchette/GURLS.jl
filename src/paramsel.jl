@@ -17,8 +17,21 @@ function process(train::TrainingProcess{Linear,LOOCV,Primal})
 
 	guesses = getLambdaGuesses(L,min(n,d),n,train.options.nLambda)
 
-	# To be continued...
-	warn("Not Yet Implemented")
+	LEFT = train.X * Q
+	RIGHT = Q' * Xy
+
+	# pre-allocate memory
+	performance = zeros(train.options.nLambda)
+
+	# Test all values for lambda
+	i = 1
+	for lambda in guesses
+		# performance[i] = validate(train,lambda)
+		performance[i] = validatePrimal(LEFT,RIGHT,L,lambda,train.y)[1]
+		# println(performance[i])
+		i += 1
+	end
+
 end
 
 
@@ -43,7 +56,7 @@ function process{Kern<:Kernel}(train::TrainingProcess{Kern,LOOCV,Dual})
 	for lambda in guesses
 		# performance[i] = validate(train,lambda)
 		performance[i] = validateDual(Q,L,Qy,lambda,train.y)[1]
-		println(performance[i])
+		# println(performance[i])
 		i += 1
 	end
 
@@ -52,6 +65,7 @@ function process{Kern<:Kernel}(train::TrainingProcess{Kern,LOOCV,Dual})
 	lambdaBest = guesses[best]
 
 	# Build the final model-- might as well use all of the training set.
+	println("Lambdabest = $lambdaBest")
 	model = buildModel(train,lambdaBest,K)
 
 	results = ParamselResults(model,guesses,performance)

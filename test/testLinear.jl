@@ -14,8 +14,8 @@ end
 
 expr = Experiment()
 
-# primal = TrainingProcess(xTrain,yTrain,kernel = Linear, rls = Primal)
-# push!(expr, primal)
+primal = TrainingProcess(xTrain,yTrain,kernel = Linear(), rls = Primal())
+push!(expr, primal)
 
 dual = TrainingProcess(xTrain,yTrain,kernel = Linear(), rls = Dual())
 push!(expr, dual)
