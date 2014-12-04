@@ -52,9 +52,9 @@ type Dual <: RLS end
 abstract Paramsel <: AbstractTask
 type LOOCV <: Paramsel end
 
-abstract Pred
-abstract Perf
-abstract Conf
+abstract Pred <: AbstractTask
+abstract Perf <: AbstractTask
+abstract Conf <: AbstractTask
 
 ###############################################################################
 # Classes to hold options for model building
@@ -166,6 +166,7 @@ include("kernel.jl")
 include("model.jl")
 include("validation.jl")
 include("paramsel.jl")
+#include("legacy.jl")
 
 
 
