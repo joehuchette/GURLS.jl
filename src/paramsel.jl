@@ -86,7 +86,7 @@ function process{Kern<:Kernel}(train::Training{Kern,LOOCV,Dual})
 
 	if Kern != Linear
 		K = buildKernel(train,kernArgs[best])
-		guesses = []
+		guesses = kernArgs
 	end
 
 	# Build the final model-- might as well use all of the training set.
