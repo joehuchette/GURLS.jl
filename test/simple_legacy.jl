@@ -13,9 +13,13 @@ for i in 1:size(xTrain,1)
 end
 
 opt = defopt("simple legacy example")
-opt.seq = ["paramsel:loocvdual", "rls:dual", "pred:dual", "perf:macroavg"]
-opt.process[1] = [2,2,0,0]
-opt.process[2] = [3,3,2,2]
+#opt.seq = ["paramsel:loocvdual", "rls:dual", "pred:dual", "perf:macroavg"]
+#opt.process[1] = [2,2,0,0]
+#opt.process[2] = [3,3,2,2]
+opt.seq = ["paramsel:loocvdual", "rls:dual", "pred:dual"]
+opt.process[1] = [2,2,0]
+opt.process[2] = [3,3,2]
+
 
 gurls(xTrain, yTrain, opt, 1)
 gurls(xTest,  yTest,  opt, 2)
