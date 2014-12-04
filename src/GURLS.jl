@@ -83,14 +83,14 @@ type TrainingProcess{K<:Kernel,P<:Paramsel,T<:RLS} <: AbstractProcess
     options::AbstractOptions # hold parameters for model building-- ie nLambda
 end
 
-function TrainingProcess(X, y; kernel   = Linear,
-                               paramsel = LOOCV,
-                               rls      = Primal)
-    options = get_options(kernel(),paramsel(),rls()) # need to actually call constructors,
+function TrainingProcess{K<:Kernel,P<:Paramsel,T<:RLS}(X, y; kernel::K   = Linear(),
+                                                             paramsel::P = LOOCV(),
+                                                             rls::T      = Primal())
+    options = get_options(kernel,paramsel,rls) # need to actually call constructors,
     												 # otherwise it passes the datatypes 
     												 # themselves, which can't be used for 
     												 # comparison, type hierarchy, etc
-    return TrainingProcess{kernel,paramsel,rls}(X,y,options)
+    return TrainingProcess{K,P,T}(X,y,options)
 end
 
 
@@ -162,7 +162,7 @@ include("kernel.jl")
 include("model.jl")
 include("validation.jl")
 include("paramsel.jl")
-#include("legacy.jl")
+include("legacy.jl")
 
 # Catch-all for undefined processes
 process{T<:AbstractProcess}(task::T) = error("Operation not defined for type $(typeof(task)).")

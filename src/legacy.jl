@@ -1,4 +1,7 @@
 # Support for the "legacy" MATLAB/C++ interface
+
+export defopt, gurls
+
 type TaskDescriptor
     kernel::Set{Kernel}
     rls::Set{RLS}
@@ -13,12 +16,10 @@ function TaskDescriptor(;kernel   = Kernel[],
                          pred     = RLS[],
                          perf     = Perf[],
                          conf     = Conf[])
-                         println("kernel = $kernel")
-                         println("type = $(typeof(kernel))")
-    TaskDescriptor(Set{Kernel}(kernel),Set(rls),Set(paramsel),Set(pred),Set(perf),Set(conf))
+    TaskDescriptor(Set{Kernel}([kernel]),Set{RLS}([rls]),Set{Paramsel}([paramsel]),Set{RLS}([pred]),Set{Perf}([perf]),Set{Conf}([conf]))
 end
 TaskDescriptor{K<:Kernel,P<:Paramsel,T<:RLS}(::TrainingProcess{K,P,T}) = 
-    TaskDescriptor(kernel=K,rls=P,paramsel=T)
+    TaskDescriptor(kernel=K(),rls=P(),paramsel=T())
 
 function merge!(t1::TaskDescriptor,t2::TaskDescriptor)
     union!(t1.kernel,t2.kernel)
@@ -35,8 +36,12 @@ type ResultTracker
     pred::Set{ParamselResults}
 end
 
-ResultTracker(res::AbstractModel) = ResultTracker(Set(res),Set())
-ResultTracker(res::ParamselResults) = ResultTracker(Set(),Set(res))
+ResultTracker(res::AbstractModel)   = 
+    ResultTracker(Set{AbstractModel}(res), Set{ParamselResults}())
+ResultTracker(res::ParamselResults) = 
+    ResultTracker(Set{AbstractModel}(),    Set{ParamselResults}(res))
+ResultTracker()                     = 
+    ResultTracker(Set{AbstractModel}(),    Set{ParamselResults}())
 
 type LegacyExperiment
     seq::Vector{ASCIIString}
@@ -65,7 +70,6 @@ function gurls(X, y, opt::LegacyExperiment, id)
         elseif process[it] in [1,2] # don't yet support writing to disk
             typ, name = split(task, ':')
             process_task!(tdesc, typ, name)
-            owner[it] = id
         elseif process[it] == 3 # load from disk...but we already have it in memory!
             merge!(res, ResultTracker(opt.results[it]))
             for k in (id-1):-1:1
@@ -85,7 +89,8 @@ function gurls(X, y, opt::LegacyExperiment, id)
     length(tdesc.paramsel) > 1 && error("Too many parameter selection routines specified")
     length(tdesc.rls)      > 1 && error("Too many problem types specified")
     length(tdesc.pred)     > 1 && error("Too many prediction types specified")
-    ( !isempty(tdesc.pred) && (tdesc.pred == tdesc.rls) ) || error("Prediction type ($(first(tdesc.pred))) and training type ($(first(tdesc.rls))) do not match")
+    println("tdesc = $tdesc")
+    isempty(tdesc.pred) || isempty(tdesc.rls) || (tdesc.pred == tdesc.rls) || error("Prediction type ($(first(tdesc.pred))) and training type ($(first(tdesc.rls))) do not match")
     (!isempty(tdesc.paramsel) && isempty(tdesc.pred) && isempty(tdesc.perf) && isempty(tdesc.conf) ) || 
         error("Cannot train and predict with the same task")
 
@@ -96,16 +101,19 @@ function gurls(X, y, opt::LegacyExperiment, id)
 
     # add defaults
     if isempty(tdesc.kernel)
-        push!(tdesc.kernel, Linear)
+        push!(tdesc.kernel, Linear())
     end
     if isempty(tdesc.rls)
-        push!(tdesc.rls, Primal)
+        push!(tdesc.rls, Primal())
     end
 
     if !isempty(tdesc.paramsel) # training process!
-        training = TrainingProcess(X, y; kernel=tdesc.kernel, paramsel=tdesc.paramsel, rls=tdesc.rls)
+        kernel   = first(tdesc.kernel)
+        paramsel = first(tdesc.paramsel)
+        rls      = first(tdesc.rls)
+        training = TrainingProcess(X, y; kernel=kernel, paramsel=paramsel, rls=rls)
         push!(opt.exper, training)
-        process(task)
+        process(training)
         return nothing
     else
         try
@@ -141,7 +149,7 @@ end
 const gurls_funcs = [
     #("split","ho")                   => error("Task not yet implemented"),
     #("paramsel","fixlambda")         => error("Task not yet implemented"),
-    #("paramsel","loocvprimal")       => error("Task not yet implemented"),
+    ("paramsel","loocvprimal")      => TaskDescriptor(paramsel=LOOCV(), rls=Primal()),
     #("paramsel","loocvdual")         => error("Task not yet implemented"),
     #("paramsel","hoprimal")          => error("Task not yet implemented"),
     #("paramsel","hodual")            => error("Task not yet implemented"),
@@ -160,12 +168,12 @@ const gurls_funcs = [
     #("paramsel","siglamhogpregr")    => error("Task not yet implemented"),
     #("paramsel","siglamloogpregr")   => error("Task not yet implemented"),
     #("kernel","chisquared")          => error("Task not yet implemented"),
-    ("kernel","linear")              => TaskDescriptor(kernel=Linear),
+    ("kernel","linear")              => TaskDescriptor(kernel=Linear()),
     #("kernel","load")                => error("Task not yet implemented"),
     #("kernel","randfeats")           => error("Task not yet implemented"),
     #("kernel","rbf")                 => error("Task not yet implemented"),
-    ("rls","primal")                 => TaskDescriptor(rls=Primal),
-    ("rls","dual")                   => TaskDescriptor(rls=Dual)
+    ("rls","primal")                 => TaskDescriptor(rls=Primal()),
+    ("rls","dual")                   => TaskDescriptor(rls=Dual())
     #("rls","auto")                   => error("Task not yet implemented"),
     #("rls","pegasos")                => error("Task not yet implemented"),
     #("rls","primalr")                => error("Task not yet implemented"),
