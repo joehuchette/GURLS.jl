@@ -31,28 +31,39 @@ function merge!(t1::TaskDescriptor,t2::TaskDescriptor)
     return t1
 end
 
+type DeletedResults <: AbstractResults end
+
 type ResultTracker
     train::Set{AbstractModel}
     pred::Set{ParamselResults}
 end
+ResultTracker() = ResultTracker(Set{AbstractModel}(), Set{ParamselResults}())
 
-ResultTracker(res::AbstractModel)   = 
-    ResultTracker(Set{AbstractModel}(res), Set{ParamselResults}())
-ResultTracker(res::ParamselResults) = 
-    ResultTracker(Set{AbstractModel}(),    Set{ParamselResults}(res))
-ResultTracker()                     = 
-    ResultTracker(Set{AbstractModel}(),    Set{ParamselResults}())
+function merge!(x::ResultTracker, y::AbstractModel)
+    push!(x.train, y)
+    return x
+end
+function merge!(x::ResultTracker, y::ParamselResults)
+    push!(x.pred, y)
+    return x
+end
+merge!(x::ResultTracker, ::DeletedResults) = x
 
 type LegacyExperiment
     seq::Vector{ASCIIString}
     process::Vector{Vector{Int}}
     tasks::Vector{TaskDescriptor}
-    results::Vector
+    results::Vector{AbstractResults}
     exper::Experiment
     name::String
 end
 # If your process requires more than 128 tasks, visit a doctor
-LegacyExperiment(name::String) = LegacyExperiment(Vector{ASCIIString}[], fill(Int[],128), Any[], TaskDescriptor[], Experiment(), name)
+LegacyExperiment(name::String) = LegacyExperiment(Vector{ASCIIString}[], 
+                                                  fill(Int[],12), 
+                                                  TaskDescriptor[],
+                                                  AbstractResults[], 
+                                                  Experiment(),
+                                                  name)
 
 defopt(name::String) = LegacyExperiment(name)
 
@@ -60,7 +71,8 @@ setoption!(opt::LegacyExperiment,option,value) =
     setfield!(opt.expr.options,symbol(option),value)
 
 function gurls(X, y, opt::LegacyExperiment, id)
-    resize!(opt.results, length(opt.seq))
+    resize!(opt.tasks,   length(opt.process))
+    resize!(opt.results, length(opt.process))
     proc = opt.process[id]
     tdesc = TaskDescriptor()
     res = ResultTracker()
@@ -71,17 +83,17 @@ function gurls(X, y, opt::LegacyExperiment, id)
             typ, name = split(task, ':')
             process_task!(tdesc, typ, name)
         elseif proc[it] == 3 # load from disk...but we already have it in memory!
-            merge!(res, ResultTracker(opt.results[it]))
             for k in (id-1):-1:1
                 s = opt.process[k]
                 if s[it] == 2
                     merge!(tdesc, opt.tasks[k])
+                    merge!(res, opt.results[k])
                     break
                 end
                 k == 1 && error("Trying to load a task that has not been executed yet")
             end
         elseif proc[it] == 4 # you really want to delete?
-            opt.results = nothing
+            opt.results = DeletedResults()
         end
     end
     # validate that task description is valid
@@ -106,13 +118,16 @@ function gurls(X, y, opt::LegacyExperiment, id)
         push!(tdesc.rls, Primal())
     end
 
+    opt.tasks[id] = tdesc
+
     if !isempty(tdesc.paramsel) # training process!
         kernel   = first(tdesc.kernel)
         paramsel = first(tdesc.paramsel)
         rls      = first(tdesc.rls)
         training = TrainingProcess(X, y; kernel=kernel, paramsel=paramsel, rls=rls)
         push!(opt.exper, training)
-        process(training)
+        results = process(training)
+        opt.results[id] = results
         return nothing
     else
         try
@@ -172,7 +187,7 @@ const gurls_funcs = [
     #("kernel","randfeats")           => error("Task not yet implemented"),
     #("kernel","rbf")                 => error("Task not yet implemented"),
     ("rls","primal")                 => TaskDescriptor(rls=Primal()),
-    ("rls","dual")                   => TaskDescriptor(rls=Dual())
+    ("rls","dual")                   => TaskDescriptor(rls=Dual()),
     #("rls","auto")                   => error("Task not yet implemented"),
     #("rls","pegasos")                => error("Task not yet implemented"),
     #("rls","primalr")                => error("Task not yet implemented"),
@@ -180,8 +195,8 @@ const gurls_funcs = [
     #("rls","randfeats")              => error("Task not yet implemented"),
     #("rls","gpregr")                 => error("Task not yet implemented"),
     #("predkernel","traintest")       => error("Task not yet implemented"),
-    #("pred","primal")                => error("Task not yet implemented"),
-    #("pred","dual")                  => error("Task not yet implemented"),
+    ("pred","primal")                => TaskDescriptor(rls=Primal()),
+    ("pred","dual")                  => TaskDescriptor(rls=Dual())
     #("pred","randfeats")             => error("Task not yet implemented"),
     #("pred","gpregr")                => error("Task not yet implemented"),
     #("perf","macroavg")              => error("Task not yet implemented"),
