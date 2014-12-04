@@ -7,22 +7,19 @@ type ParamselResults <: AbstractResults
 end
 
 ##############################################################################
-function process{R<:RLS}(train::TrainingProcess{Linear,LOOCV,R})
-XX = train.X' * train.X
+function process{K<:Kernel}(train::TrainingProcess{K,LOOCV,Dual})
+# XX = train.X' * train.X
+
 (n,d) = size(train.X)
 
+K = buildKernel(train)
 
-# Figure out the lambdas we need to search -- based off of paramsel_lambdaguess.m
-(eigs,) = eig(XX)
-sort!(eigs,rev = true) 
+# Compute the eigenfactorization of K
+(L,Q) = eig(K)
 r = rank(train.X)
-lmax = eigs[1]
-lmin = max(min(lmax * 1e-8, eigs[r]),200*sqrt(eps()))
+Qy = Q' * train.y
 
-powers = linspace(0,1,train.options.nLambda)
-guesses = lmin.*(lmax/lmin).^(powers)
-guesses = guesses/n
-
+guesses = getLambdaGuesses(L,r,n,train.options.nLambda)
 
 # pre-allocate memory
 performance = zeros(train.options.nLambda)
@@ -30,7 +27,8 @@ performance = zeros(train.options.nLambda)
 # Test all values for lambda
 i = 1
 for lambda in guesses
-	performance[i] = validate(train,lambda)
+	# performance[i] = validate(train,lambda)
+	performance[i] = validateDual(Q,L,Qy,lambda,train.y)
 	println(performance[i])
 	i += 1
 end
@@ -44,4 +42,19 @@ model = buildModel(train,lambdaBest)
 
 results = ParamselResults(model,guesses,performance)
 return results
+end
+
+validateDual(x,y,z,w,v) = 0
+
+function getLambdaGuesses(eig,rank,n,nLambda)
+# Figure out the lambdas we need to search -- based off of paramsel_lambdaguess.m
+	eigs = sort(eig,rev = true) # pass by reference, and order matters for later use. 
+	lmax = eigs[1]
+	lmin = max(min(lmax * 1e-8, eigs[r]),200*sqrt(eps()))
+
+	powers = linspace(0,1,nLambda)
+	guesses = lmin.*(lmax/lmin).^(powers)
+	guesses = guesses/n
+
+	return guesses
 end

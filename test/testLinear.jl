@@ -14,11 +14,11 @@ end
 
 expr = Experiment()
 
-proc1 = TrainingProcess(xTrain,yTrain,kernel = Linear, rls = Primal)
-push!(expr, proc1)
+# primal = TrainingProcess(xTrain,yTrain,kernel = Linear, rls = Primal)
+# push!(expr, primal)
 
-proc2 = TrainingProcess(xTrain,yTrain,kernel = Linear, rls = Dual)
-push!(expr, proc2)
+dual = TrainingProcess(xTrain,yTrain,kernel = Linear, rls = Dual)
+push!(expr, dual)
 
 res = process(expr)
 
