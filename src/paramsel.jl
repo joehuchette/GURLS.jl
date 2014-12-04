@@ -49,33 +49,48 @@ function process{Kern<:Kernel}(train::Training{Kern,LOOCV,Dual})
 
 	(n,d) = size(train.X)
 
-	K = buildKernel(train)
-
-	# Compute the eigenfactorization of K
-	(L,Q) = eig(K)
-	r = rank(train.X)
-	Qy = Q' * train.y
-
-	guesses = getLambdaGuesses(L,r,n,train.options.nLambda)
+	kernelSpace = getKernelSpace(Kern)
 
 	# pre-allocate memory
-	performance = zeros(train.options.nLambda)
+	performance = zeros(train.options.nLambda,length(kernelSpace))
+	lambdaBests = zeros(length(kernelSpace))
+	j = 1
+	for kernArgs in kernelSpace
 
-	# Test all values for lambda
-	i = 1
-	for lambda in guesses
-		# performance[i] = validate(train,lambda)
-		performance[i] = validateDual(Q,L,Qy,lambda,train.y)[1]
-		# println(performance[i])
-		i += 1
+		K = buildKernel(train,kernArgs...)
+
+		# Compute the eigenfactorization of K
+		(L,Q) = eig(K)
+		r = rank(train.X)
+		Qy = Q' * train.y
+
+		guesses = getLambdaGuesses(L,r,n,train.options.nLambda)
+
+		# Test all values for lambda
+		i = 1
+		for lambda in guesses
+			# performance[i] = validate(train,lambda)
+			performance[i,j] = validateDual(Q,L,Qy,lambda,train.y)[1]
+			# println(performance[i])
+			i += 1
+		end
+
+		# Find the best value for lambda
+		perf, best = findmin(performance[:,j])
+		lambdaBests[j] = guesses[best]
+
+		j += 1
 	end
 
-	# Find the best value for lambda
-	_, best = findmin(performance)
-	lambdaBest = guesses[best]
+	_,best = findmin(min(performance,1)) # find best value for kernArgs
+
+	if Kern != Linear
+		K = buildKernel(train,kernArgs[best])
+		guesses = []
+	end
 
 	# Build the final model-- might as well use all of the training set.
-	model = buildModel(train,lambdaBest,K)
+	model = buildModel(train,lambdaBests[best],K)
 
 	results = ParamselResults(model,guesses,performance)
 	return results

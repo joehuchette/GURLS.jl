@@ -23,9 +23,9 @@ function buildKernel(data::Training{Gaussian,LOOCV,Dual},sigma)
 end
 
 function getKernelSpace(k)
-	if isa(k,Linear)
+	if k == Linear
 		return [()]
-	elseif isa(k,Gaussian)
+	elseif k == Gaussian
 		error("Not Yet Implemented")
 	else
 		error("Unknown Kernel")
