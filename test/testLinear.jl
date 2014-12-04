@@ -28,7 +28,7 @@ pred = sign(predict(m,xTest))
 nCorrect = sum(pred .== yTest)
 println("Primal: $(100*nCorrect/size(xTest,1))%")
 
-m = res[2].model
-pred = sign(predict(m,xTest))
-nCorrect = sum(pred .== yTest)
-println("Dual: $(100* nCorrect/size(xTest,1))%")
+# m = res[2].model
+# pred = sign(predict(m,xTest))
+# nCorrect = sum(pred .== yTest)
+# println("Dual: $(100* nCorrect/size(xTest,1))%")

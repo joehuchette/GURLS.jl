@@ -17,8 +17,21 @@ function process(train::TrainingProcess{Linear,LOOCV,Primal})
 
 	guesses = getLambdaGuesses(L,min(n,d),n,train.options.nLambda)
 
-	# To be continued...
-	warn("Not Yet Implemented")
+	LEFT = train.X * Q
+	RIGHT = Q' * Xy
+
+	# pre-allocate memory
+	performance = zeros(train.options.nLambda)
+
+	# Test all values for lambda
+	i = 1
+	for lambda in guesses
+		# performance[i] = validate(train,lambda)
+		performance[i] = validatePrimal(LEFT,RIGHT,lambda,train.y)[1]
+		# println(performance[i])
+		i += 1
+	end
+
 end
 
 
