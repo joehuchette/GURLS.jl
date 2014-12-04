@@ -33,7 +33,7 @@ function process(train::Training{Linear,LOOCV,Primal})
 	end
 
 		# Find the best value for lambda
-	(notused,best) = findmin(performance)
+	_, best = findmin(performance)
 	lambdaBest = guesses[best]
 
 	# Build the final model-- might as well use all of the training set.
@@ -64,9 +64,7 @@ function process{Kern<:Kernel}(train::Training{Kern,LOOCV,Dual})
 	# Test all values for lambda
 	i = 1
 	for lambda in guesses
-		# performance[i] = validate(train,lambda)
 		performance[i] = validateDual(Q,L,Qy,lambda,train.y)[1]
-		# println(performance[i])
 		i += 1
 	end
 

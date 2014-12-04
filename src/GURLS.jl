@@ -29,6 +29,19 @@ type Experiment
     options
 end
 Experiment() = Experiment(AbstractProcess[],nothing)
+function Experiment(args...)
+    ex = Experiment()
+    for arg in args
+        if isa(arg, AbstractProcess)
+            push!(ex.pipeline, arg)
+        elseif isa(arg, AbstractOptions)
+            ex.options = arg
+        else
+            error("Unexpected argument of type $(typeof(arg))")
+        end
+    end
+    return ex
+end
 
 Base.push!{P<:AbstractProcess}(x::Experiment,y::P) = push!(x.pipeline,y)
 
@@ -108,6 +121,7 @@ type Performance <: AbstractProcess
     pred::Prediction
     perf::Vector{Perf}
 end
+Performance(pred::Prediction, args::Perf...) = Performance(pred, collect(args))
 
 ###############################################################################
 # Confidence: Procedure to quantify confidence in a given prediction
@@ -115,7 +129,7 @@ type Confidence <: AbstractProcess
     pred::Prediction
     conf::Vector{Conf}
 end
-
+Confidence(pred::Prediction, args::Conf...) = Confidence(pred, collect(args))
 
 ###############################################################################
 # Returns the desired options structure based on types given--- also serves to 
