@@ -39,6 +39,7 @@ abstract AbstractTask
 # Kernel: Kernel type used in prediction
 abstract Kernel <: AbstractTask
 type Linear <: Kernel end
+type Gaussian <: Kernel end
 
 ###############################################################################
 # RLS: Formulation type used in prediction
