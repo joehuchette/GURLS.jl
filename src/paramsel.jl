@@ -37,7 +37,6 @@ function process(train::TrainingProcess{Linear,LOOCV,Primal})
 	lambdaBest = guesses[best]
 
 	# Build the final model-- might as well use all of the training set.
-	println("Lambdabest = $lambdaBest")
 	model = buildModel(train,lambdaBest)
 
 	results = ParamselResults(model,guesses,performance)
@@ -76,7 +75,6 @@ function process{Kern<:Kernel}(train::TrainingProcess{Kern,LOOCV,Dual})
 	lambdaBest = guesses[best]
 
 	# Build the final model-- might as well use all of the training set.
-	println("Lambdabest = $lambdaBest")
 	model = buildModel(train,lambdaBest,K)
 
 	results = ParamselResults(model,guesses,performance)
