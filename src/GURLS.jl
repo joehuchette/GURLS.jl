@@ -123,15 +123,14 @@ end
 # validate inputs
 
 # catch-all, runs if less-specific case is available.
-get_options{K<:Kernel, P <: Paramsel, R <: RLS}(kernal::K,paramsel::P,rls::R) = 
+get_options(::Kernel,::Paramsel,::RLS) = 
     error("Given training routine is not supported")
 
-get_options(kernel::Linear,paramsel::LOOCV,rls::Primal) =
+get_options(::Linear,::LOOCV,::Primal) =
     LinearOptions(100) # can pick nLambda intelligently later
 
-get_options(kernel::Linear,paramsel::LOOCV,rls::Dual) =
+get_options(::Linear,::LOOCV,::Dual) =
 	LinearOptions(100)
-
 
 ##############################################################################
 # Type to hold the results of an abstract process
@@ -148,15 +147,9 @@ Base.show(io::IO,res::AbstractResults) = print(io,res)
 
 ##############################################################################
 # Main routine that processes an experiment.
-function process(e::Experiment)
-	results = Array(AbstractResults,length(e.pipeline))
-	i = 1
-	for task in e.pipeline
-		results[i] = process(task)
-		i += 1
-	end
-	return results
-end
+process(e::Experiment) = map(process, e.pipeline)
+# Catch-all for undefined processes
+process(task) = error("Operation not defined for type $(typeof(task)).")
 
 include("utils.jl")
 include("kernel.jl")
@@ -164,9 +157,6 @@ include("model.jl")
 include("validation.jl")
 include("paramsel.jl")
 include("legacy.jl")
-
-# Catch-all for undefined processes
-process(task) = error("Operation not defined for type $(typeof(task)).")
 
 ##############################################################################
 

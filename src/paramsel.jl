@@ -1,9 +1,9 @@
 ##############################################################################
 # Holds the results of our parameter selection process
-type ParamselResults <: AbstractResults
+type ParamselResults{T<:Real} <: AbstractResults
 	model::AbstractModel
-	guesses::Array{Any} # Can contain tuples for sig/lam selection
-	performance::Array{Real}
+	guesses::Array # Can contain tuples for sig/lam selection
+	performance::Array{T}
 end
 
 ##############################################################################
@@ -61,7 +61,7 @@ function process{Kern<:Kernel}(train::TrainingProcess{Kern,LOOCV,Dual})
 	end
 
 	# Find the best value for lambda
-	(notused,best) = findmin(performance)
+	_, best = findmin(performance)
 	lambdaBest = guesses[best]
 
 	# Build the final model-- might as well use all of the training set.
