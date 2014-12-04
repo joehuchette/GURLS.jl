@@ -21,3 +21,34 @@ function validate{T,S}(train::TrainingProcess{T,LOOCV,S},lambda::Real,args...)
 	return sum(scores)/n
 
 end
+
+
+
+function validateDual(Q,L,Qy,lambda,y)
+	# Computes sum of square LOOE given the singular value decomposition of the
+	# kernel matrix
+	# 
+	# INPUTS
+	# -Q: eigenvectors of the kernel matrix
+	# -L: eigenvalues of the kernel matrix
+	# -Qy: result of the matrix multiplication of the transpose of Q times the
+	#       labels vector Y (Q*Y)
+	# -lambda: regularization parameter
+	# 
+	# OUTPUT:
+	# -perfT: 1xT 2d-array of sum of square LOOE per class
+
+	[n,T] = size(y)
+
+	C = rls_eigen(Q,L,lambda,n)
+	Z = GInverseDiagonal(Q,L,lambda)
+
+	perf = zeros(n,t)
+	for t = 1:T
+		perf[:,t] = C[:,t]./Z
+	end
+
+	perfT = sum(perf.^2,1)
+
+	return perfT
+end
