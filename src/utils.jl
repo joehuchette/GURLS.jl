@@ -10,6 +10,8 @@ function GInverseDiagonal(Q,L,lambda)
 	    d = L + (n*lambda(i))
 	    d  = d.^(-1)
 	    Z[:,i] = D*d
+	end
+	
 	return Z	
 end
 
