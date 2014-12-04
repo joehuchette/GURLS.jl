@@ -1,3 +1,3 @@
-function macroavg(perf::PerformanceProcess)
+function macroavg(perf::Performance)
     
 end

@@ -8,7 +8,7 @@ end
 
 ##############################################################################
 
-function process(train::TrainingProcess{Linear,LOOCV,Primal})
+function process(train::Training{Linear,LOOCV,Primal})
 	XX = train.X' * train.X
 	Xy = train.X' * train.y
 	(n,d) = size(train.X)
@@ -46,7 +46,7 @@ function process(train::TrainingProcess{Linear,LOOCV,Primal})
 end
 
 
-function process{Kern<:Kernel}(train::TrainingProcess{Kern,LOOCV,Dual})
+function process{Kern<:Kernel}(train::Training{Kern,LOOCV,Dual})
 
 	(n,d) = size(train.X)
 

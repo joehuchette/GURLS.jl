@@ -3,8 +3,8 @@ module GURLS
 importall Base
 
 export AbstractProcess, Experiment, AbstractTask, Kernel, Linear, RLS, Primal,
-       Dual, Paramsel, LOOCV, Pred, Perf, Conf, TrainingProcess, 
-       PredictionProcess, PerformanceProcess, ConfidenceProcess,
+       Dual, Paramsel, LOOCV, Pred, Perf, Conf, Training, 
+       Prediction, Performance, Confidence,
        process,predict
 
 ###############################################################################
@@ -77,45 +77,45 @@ type LinearOptions <: AbstractOptions
 end
 
 ###############################################################################
-# TrainingProcess: Procedure to train data (X,y) using a given kernel, 
+# Training: Procedure to train data (X,y) using a given kernel, 
 #                  parameter selection procedure, and formulation type
-type TrainingProcess{K<:Kernel,P<:Paramsel,T<:RLS} <: AbstractProcess
+type Training{K<:Kernel,P<:Paramsel,T<:RLS} <: AbstractProcess
     X
     y
     options::AbstractOptions # hold parameters for model building-- ie nLambda
 end
 
-function TrainingProcess{K<:Kernel,P<:Paramsel,T<:RLS}(X, y; kernel::K   = Linear(),
+function Training{K<:Kernel,P<:Paramsel,T<:RLS}(X, y; kernel::K   = Linear(),
                                                              paramsel::P = LOOCV(),
                                                              rls::T      = Primal())
     options = get_options(kernel,paramsel,rls) # need to actually call constructors,
     												 # otherwise it passes the datatypes 
     												 # themselves, which can't be used for 
     												 # comparison, type hierarchy, etc
-    return TrainingProcess{K,P,T}(X,y,options)
+    return Training{K,P,T}(X,y,options)
 end
 
 
 
 ###############################################################################
-# PredictionProcess: Procedure to predict on test data, given a training run
-type PredictionProcess <: AbstractProcess
-    training::TrainingProcess
+# Prediction: Procedure to predict on test data, given a training run
+type Prediction <: AbstractProcess
+    training::Training
     X
     y
 end
 
 ###############################################################################
-# PerformanceProcess: Procedure to assess performance of a given prediction
-type PerformanceProcess <: AbstractProcess
-    pred::PredictionProcess
+# Performance: Procedure to assess performance of a given prediction
+type Performance <: AbstractProcess
+    pred::Prediction
     perf::Vector{Perf}
 end
 
 ###############################################################################
-# ConfidenceProcess: Procedure to quantify confidence in a given prediction
-type ConfidenceProcess <: AbstractProcess
-    pred::PredictionProcess
+# Confidence: Procedure to quantify confidence in a given prediction
+type Confidence <: AbstractProcess
+    pred::Prediction
     conf::Vector{Conf}
 end
 

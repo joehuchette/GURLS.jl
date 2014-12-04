@@ -1,9 +1,9 @@
-function buildKernel(data::TrainingProcess{Linear,LOOCV,Dual})
+function buildKernel(data::Training{Linear,LOOCV,Dual})
 	k = data.X * data.X'
 	return k
 end
 
-function buildKernel(data::TrainingProcess{Gaussian,LOOCV,Dual},sigma)
+function buildKernel(data::Training{Gaussian,LOOCV,Dual},sigma)
 	(n,d) = size(data.X)
 
 	k = zeros(n,n) # malloc

@@ -18,7 +18,7 @@ function TaskDescriptor(;kernel   = Kernel[],
                          conf     = Conf[])
     TaskDescriptor(Set{Kernel}([kernel]),Set{RLS}([rls]),Set{Paramsel}([paramsel]),Set{RLS}([pred]),Set{Perf}([perf]),Set{Conf}([conf]))
 end
-TaskDescriptor{K<:Kernel,P<:Paramsel,T<:RLS}(::TrainingProcess{K,P,T}) = 
+TaskDescriptor{K<:Kernel,P<:Paramsel,T<:RLS}(::Training{K,P,T}) = 
     TaskDescriptor(kernel=K(),rls=P(),paramsel=T())
 
 function merge!(t1::TaskDescriptor,t2::TaskDescriptor)
@@ -124,7 +124,7 @@ function gurls(X, y, opt::LegacyExperiment, id)
         kernel   = first(tdesc.kernel)
         paramsel = first(tdesc.paramsel)
         rls      = first(tdesc.rls)
-        training = TrainingProcess(X, y; kernel=kernel, paramsel=paramsel, rls=rls)
+        training = Training(X, y; kernel=kernel, paramsel=paramsel, rls=rls)
         push!(opt.exper, training)
         results = process(training)
         opt.results[id] = results
@@ -137,7 +137,7 @@ function gurls(X, y, opt::LegacyExperiment, id)
         end
     end
     if !isempty!(tdesc.pred)
-        prediction = PredictionProcess(training, X, y)
+        prediction = Prediction(training, X, y)
         push!(opt.exper, prediction)
     else
         try
@@ -153,7 +153,7 @@ function gurls(X, y, opt::LegacyExperiment, id)
         process(perf)
     end
     if !isempty(tdesc.conf)
-        conf = ConfidenceProcess(prediction, collect(tdesc.conf))
+        conf = Confidence(prediction, collect(tdesc.conf))
         push!(opt.exper, conf)
         process(conf)
     end
