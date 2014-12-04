@@ -89,6 +89,11 @@ type LinearOptions <: AbstractOptions
 	nLambda::Int
 end
 
+type GaussianOptions <: AbstractOptions
+	nLambda::Int
+	nSigma::Int
+end
+
 ###############################################################################
 # Training: Procedure to train data (X,y) using a given kernel, 
 #                  parameter selection procedure, and formulation type
@@ -144,6 +149,9 @@ get_options(::Linear,::LOOCV,::Primal) =
 
 get_options(::Linear,::LOOCV,::Dual) =
 	LinearOptions(100)
+
+get_options(::Gaussian,::LOOCV,::Dual) =
+	GaussianOptions(100,100)
 
 ##############################################################################
 # Type to hold the results of an abstract process
