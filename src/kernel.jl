@@ -22,7 +22,7 @@ function buildKernel(data::Training{Gaussian,LOOCV,Dual},sigma)
 	return k
 end
 
-function getKernelSpace(k)
+function getKernelSpace(k,train::Training)
 	if k == Linear
 		return [()]
 	elseif k == Gaussian

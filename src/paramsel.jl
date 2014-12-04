@@ -49,7 +49,7 @@ function process{Kern<:Kernel}(train::Training{Kern,LOOCV,Dual})
 
 	(n,d) = size(train.X)
 
-	kernelSpace = getKernelSpace(Kern)
+	kernelSpace = getKernelSpace(Kern,train)
 
 	# pre-allocate memory
 	performance = zeros(train.options.nLambda,length(kernelSpace))
