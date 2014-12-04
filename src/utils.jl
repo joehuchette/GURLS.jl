@@ -7,8 +7,8 @@ function GInverseDiagonal(Q,L,lambda)
 
 	D = Q.^(2)
 	for i = 1:t
-	    d = L + (n*lambda(i))
-	    d  = d.^(-1)
+	    d = L + (n*lambda[i])
+	    d = 1 ./ d
 	    Z[:,i] = D*d
 	end
 	
@@ -34,7 +34,7 @@ function rls_eigen(Q,L,Qy,lambda,n)
 	# -C: rls coefficient vector
 
 	L = L + n*lambda;
-	L = diag(L.^(-1));
+	L = diagm(1 ./ L);
 	C = (Q*L)*Qy;
 	return C
 end
