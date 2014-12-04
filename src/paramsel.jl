@@ -58,8 +58,6 @@ function process{Kern<:Kernel}(train::TrainingProcess{Kern,LOOCV,Dual})
 	return results
 end
 
-validateDual(x,y,z,w,v) = 0
-
 function getLambdaGuesses(eig,rank,n,nLambda)
 # Figure out the lambdas we need to search -- based off of paramsel_lambdaguess.m
 
