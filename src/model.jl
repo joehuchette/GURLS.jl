@@ -29,7 +29,7 @@ function buildModel{P<:Paramsel}(train::TrainingProcess{Linear,P,Primal},lambda:
 	return LinearModel(vec(w))
 end
 
-function buildModel{P<:Paramsel}(train::TrainingProcess{Linear,P,Dual},lambda::Real)
+function buildModel{P<:Paramsel,R<:Real}(train::TrainingProcess{Linear,P,Dual},lambda::Real,K::Array{R,2})
 
 	n = size(train.X,1)
 

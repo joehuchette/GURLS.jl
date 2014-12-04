@@ -7,8 +7,21 @@ type ParamselResults <: AbstractResults
 end
 
 ##############################################################################
-function process{K<:Kernel}(train::TrainingProcess{K,LOOCV,Dual})
-# XX = train.X' * train.X
+function process(train::TrainingProcess{Linear,LOOCV,Primal})
+	XX = train.X' * train.X
+	Xy = train.X' * train.y
+	(n,d) = size(train.X)
+
+	(L,Q) = eig(XX)
+
+	guesses = getLambdaGuesses(L,min(n,d),n,train.options.nLambda)
+
+	# To be continued...
+	warn("Not Yet Implemented")
+end
+
+
+function process{Kern<:Kernel}(train::TrainingProcess{Kern,LOOCV,Dual})
 
 (n,d) = size(train.X)
 
@@ -38,7 +51,7 @@ end
 lambdaBest = guesses[best]
 
 # Build the final model-- might as well use all of the training set.
-model = buildModel(train,lambdaBest)
+model = buildModel(train,lambdaBest,K)
 
 results = ParamselResults(model,guesses,performance)
 return results
@@ -48,9 +61,10 @@ validateDual(x,y,z,w,v) = 0
 
 function getLambdaGuesses(eig,rank,n,nLambda)
 # Figure out the lambdas we need to search -- based off of paramsel_lambdaguess.m
+
 	eigs = sort(eig,rev = true) # pass by reference, and order matters for later use. 
 	lmax = eigs[1]
-	lmin = max(min(lmax * 1e-8, eigs[r]),200*sqrt(eps()))
+	lmin = max(min(lmax * 1e-8, eigs[rank]),200*sqrt(eps()))
 
 	powers = linspace(0,1,nLambda)
 	guesses = lmin.*(lmax/lmin).^(powers)
