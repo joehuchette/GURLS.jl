@@ -8,7 +8,7 @@ function validate{T,S}(train::TrainingProcess{T,LOOCV,S},lambda::Real,args...)
 
 	function linearEst(train_inds)
 		# Use the types S and T as defined by the method call
-		return buildModel(TrainingProcess(train.X[[train_inds],:], train.y[train_inds]; kernel=T, paramsel=LOOCV, rls=S),lambda)
+		return buildModel(TrainingProcess(train.X[[train_inds],:], train.y[train_inds]; kernel=T(), paramsel=LOOCV(), rls=S()),lambda)
 	end
 
 	function evalSSE(model, test_inds)
