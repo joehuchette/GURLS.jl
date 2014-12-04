@@ -14,8 +14,8 @@ end
 
 expr = Experiment()
 
-# primal = TrainingProcess(xTrain,yTrain,kernel = Linear, rls = Primal)
-# push!(expr, primal)
+primal = TrainingProcess(xTrain,yTrain,kernel = Linear, rls = Primal)
+push!(expr, primal)
 
 dual = TrainingProcess(xTrain,yTrain,kernel = Linear(), rls = Dual())
 push!(expr, dual)
@@ -28,7 +28,7 @@ pred = sign(predict(m,xTest))
 nCorrect = sum(pred .== yTest)
 println("Primal: $(100*nCorrect/size(xTest,1))%")
 
-# m = res[2].model
-# pred = sign(predict(m,xTest))
-# nCorrect = sum(pred .== yTest)
-# println("Dual: $(100* nCorrect/size(xTest,1))%")
+m = res[2].model
+pred = sign(predict(m,xTest))
+nCorrect = sum(pred .== yTest)
+println("Dual: $(100* nCorrect/size(xTest,1))%")
