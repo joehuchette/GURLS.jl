@@ -21,10 +21,8 @@ function buildModel{P<:Paramsel}(train::TrainingProcess{Linear,P,Primal},lambda:
 	(n,d) = size(train.X)
 	XtX = train.X' * train.X + n * lambda * eye(d)
 	Xty = train.X' * train.y
-	cholfact!(XtX)
-	w = XtX\(XtX'\Xty)
-
-	# println("Primal: ",w)
+	k = chol(XtX)
+	w = k\(k'\Xty)
 
 	return LinearModel(vec(w))
 end
@@ -33,13 +31,11 @@ function buildModel{P<:Paramsel,R<:Real}(train::TrainingProcess{Linear,P,Dual},l
 
 	n = size(train.X,1)
 
-	K = buildKernel(train) + n * lambda * eye(n)
+	K += n * lambda * eye(n)
 
-	cholfact!(K)
+	kFact = chol(K)
 
-	w = train.X' * (K\(K'\train.y))
-
-	# println("Dual: ",w)
+	w = train.X' * (kFact\(kFact'\train.y))
 
 	return LinearModel(vec(w))
 
