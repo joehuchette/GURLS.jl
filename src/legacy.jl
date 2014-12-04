@@ -61,16 +61,16 @@ setoption!(opt::LegacyExperiment,option,value) =
 
 function gurls(X, y, opt::LegacyExperiment, id)
     resize!(opt.results, length(opt.seq))
-    process = opt.process[id]
+    proc = opt.process[id]
     tdesc = TaskDescriptor()
     res = ResultTracker()
     for (it,task) in enumerate(opt.seq)
-        if process[it] == 0 # ignore
+        if proc[it] == 0 # ignore
             continue
-        elseif process[it] in [1,2] # don't yet support writing to disk
+        elseif proc[it] in [1,2] # don't yet support writing to disk
             typ, name = split(task, ':')
             process_task!(tdesc, typ, name)
-        elseif process[it] == 3 # load from disk...but we already have it in memory!
+        elseif proc[it] == 3 # load from disk...but we already have it in memory!
             merge!(res, ResultTracker(opt.results[it]))
             for k in (id-1):-1:1
                 s = opt.process[k]
@@ -80,7 +80,7 @@ function gurls(X, y, opt::LegacyExperiment, id)
                 end
                 k == 1 && error("Trying to load a task that has not been executed yet")
             end
-        elseif process[it] == 4 # you really want to delete?
+        elseif proc[it] == 4 # you really want to delete?
             opt.results = nothing
         end
     end
@@ -89,7 +89,6 @@ function gurls(X, y, opt::LegacyExperiment, id)
     length(tdesc.paramsel) > 1 && error("Too many parameter selection routines specified")
     length(tdesc.rls)      > 1 && error("Too many problem types specified")
     length(tdesc.pred)     > 1 && error("Too many prediction types specified")
-    println("tdesc = $tdesc")
     isempty(tdesc.pred) || isempty(tdesc.rls) || (tdesc.pred == tdesc.rls) || error("Prediction type ($(first(tdesc.pred))) and training type ($(first(tdesc.rls))) do not match")
     (!isempty(tdesc.paramsel) && isempty(tdesc.pred) && isempty(tdesc.perf) && isempty(tdesc.conf) ) || 
         error("Cannot train and predict with the same task")
@@ -150,7 +149,7 @@ const gurls_funcs = [
     #("split","ho")                   => error("Task not yet implemented"),
     #("paramsel","fixlambda")         => error("Task not yet implemented"),
     ("paramsel","loocvprimal")      => TaskDescriptor(paramsel=LOOCV(), rls=Primal()),
-    #("paramsel","loocvdual")         => error("Task not yet implemented"),
+    ("paramsel","loocvdual")        => TaskDescriptor(paramsel=LOOCV(), rls=Dual()),
     #("paramsel","hoprimal")          => error("Task not yet implemented"),
     #("paramsel","hodual")            => error("Task not yet implemented"),
     #("paramsel","siglam")            => error("Task not yet implemented"),

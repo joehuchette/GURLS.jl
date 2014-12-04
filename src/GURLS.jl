@@ -165,7 +165,7 @@ include("paramsel.jl")
 include("legacy.jl")
 
 # Catch-all for undefined processes
-process{T<:AbstractProcess}(task::T) = error("Operation not defined for type $(typeof(task)).")
+process(task) = error("Operation not defined for type $(typeof(task)).")
 
 ##############################################################################
 

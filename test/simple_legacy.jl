@@ -12,8 +12,8 @@ for i in 1:size(xTrain,1)
 	xTest[i,:] -= xMeans
 end
 
-opt = GURLS.defopt("simple legacy example")
-opt.seq = ["paramsel:loocvprimal", "rls:primal", "pred:primal", "perf:macroavg"]
+opt = defopt("simple legacy example")
+opt.seq = ["paramsel:loocvdual", "rls:dual", "pred:dual", "perf:macroavg"]
 opt.process[1] = [2,2,0,0]
 opt.process[2] = [3,3,2,2]
 
