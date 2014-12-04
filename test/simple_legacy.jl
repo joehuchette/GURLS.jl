@@ -1,5 +1,5 @@
 # A bare bones test to quickly route out syntax errors
-using GURLS
+using GURLS.Legacy
 
 xTrain = readcsv("../data/xTrain.csv")
 yTrain = readcsv("../data/yTrain.csv")

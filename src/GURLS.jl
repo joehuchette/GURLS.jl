@@ -5,7 +5,7 @@ importall Base
 export AbstractProcess, Experiment, AbstractTask, Kernel, Linear, RLS, Primal,
        Dual, Paramsel, LOOCV, Pred, Perf, Conf, Training, 
        Prediction, Performance, Confidence,
-       process,predict
+       process, predict
 
 ###############################################################################
 # AbstractProcess: Abstract type for a process in the experiment 
@@ -86,8 +86,8 @@ type Training{K<:Kernel,P<:Paramsel,T<:RLS} <: AbstractProcess
 end
 
 function Training{K<:Kernel,P<:Paramsel,T<:RLS}(X, y; kernel::K   = Linear(),
-                                                             paramsel::P = LOOCV(),
-                                                             rls::T      = Primal())
+                                                      paramsel::P = LOOCV(),
+                                                      rls::T      = Primal())
     options = get_options(kernel,paramsel,rls) # need to actually call constructors,
     												 # otherwise it passes the datatypes 
     												 # themselves, which can't be used for 
@@ -95,14 +95,11 @@ function Training{K<:Kernel,P<:Paramsel,T<:RLS}(X, y; kernel::K   = Linear(),
     return Training{K,P,T}(X,y,options)
 end
 
-
-
 ###############################################################################
 # Prediction: Procedure to predict on test data, given a training run
 type Prediction <: AbstractProcess
     training::Training
     X
-    y
 end
 
 ###############################################################################

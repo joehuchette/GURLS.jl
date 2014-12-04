@@ -1,5 +1,10 @@
 # Support for the "legacy" MATLAB/C++ interface
 
+module Legacy
+
+using ..GURLS
+using ..GURLS: AbstractResults, AbstractModel, ParamselResults
+
 export defopt, gurls
 
 type TaskDescriptor
@@ -217,3 +222,5 @@ function process_task!(tdesc,typ::String,name::String)
         error("Unrecognized task '$(typ):$(name)' passed")
     end
 end
+
+end #module
