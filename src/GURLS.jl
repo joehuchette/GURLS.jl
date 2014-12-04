@@ -3,8 +3,8 @@ module GURLS
 importall Base
 
 export AbstractProcess, Experiment, AbstractTask, Kernel, Linear, RLS, Primal,
-       Dual, Paramsel, LOOCV, Pred, Perf, Conf, TrainingProcess, 
-       PredictionProcess, PerformanceProcess, ConfidenceProcess,
+       Dual, Paramsel, LOOCV, Pred, Perf, Conf, Training, 
+       Prediction, Performance, Confidence,
        process,predict
 
 ###############################################################################
@@ -13,10 +13,11 @@ export AbstractProcess, Experiment, AbstractTask, Kernel, Linear, RLS, Primal,
 abstract AbstractProcess
 
 function Base.print(io::IO,res::AbstractProcess)
-	print(io,"$(typeof(res)) with:\n")
+	print(io,"$(typeof(res)) with:")
 	fields = names(res)
 	for field in fields
-		print(io,"\t$(field): $(typeof(res.(field)))\n")
+        println(io)
+		print(io,"\t$(field): $(typeof(res.(field)))")
 	end
 end
 Base.show(io::IO,res::AbstractProcess) = print(io,res)
@@ -62,10 +63,11 @@ abstract Conf <: AbstractTask
 abstract AbstractOptions
 
 function Base.print(io::IO,res::AbstractOptions)
-	print(io,"$(typeof(res)) with:\n")
+	print(io,"$(typeof(res)) with:")
 	fields = names(res)
 	for field in fields
-		print(io,"\t$(field): $(res.(field))\n")
+        println(io)
+		print(io,"\t$(field): $(res.(field))")
 	end
 end
 Base.show(io::IO,res::AbstractOptions) = print(io,res)
@@ -75,45 +77,45 @@ type LinearOptions <: AbstractOptions
 end
 
 ###############################################################################
-# TrainingProcess: Procedure to train data (X,y) using a given kernel, 
+# Training: Procedure to train data (X,y) using a given kernel, 
 #                  parameter selection procedure, and formulation type
-type TrainingProcess{K<:Kernel,P<:Paramsel,T<:RLS} <: AbstractProcess
+type Training{K<:Kernel,P<:Paramsel,T<:RLS} <: AbstractProcess
     X
     y
     options::AbstractOptions # hold parameters for model building-- ie nLambda
 end
 
-function TrainingProcess{K<:Kernel,P<:Paramsel,T<:RLS}(X, y; kernel::K   = Linear(),
+function Training{K<:Kernel,P<:Paramsel,T<:RLS}(X, y; kernel::K   = Linear(),
                                                              paramsel::P = LOOCV(),
                                                              rls::T      = Primal())
     options = get_options(kernel,paramsel,rls) # need to actually call constructors,
     												 # otherwise it passes the datatypes 
     												 # themselves, which can't be used for 
     												 # comparison, type hierarchy, etc
-    return TrainingProcess{K,P,T}(X,y,options)
+    return Training{K,P,T}(X,y,options)
 end
 
 
 
 ###############################################################################
-# PredictionProcess: Procedure to predict on test data, given a training run
-type PredictionProcess <: AbstractProcess
-    training::TrainingProcess
+# Prediction: Procedure to predict on test data, given a training run
+type Prediction <: AbstractProcess
+    training::Training
     X
     y
 end
 
 ###############################################################################
-# PerformanceProcess: Procedure to assess performance of a given prediction
-type PerformanceProcess <: AbstractProcess
-    pred::PredictionProcess
+# Performance: Procedure to assess performance of a given prediction
+type Performance <: AbstractProcess
+    pred::Prediction
     perf::Vector{Perf}
 end
 
 ###############################################################################
-# ConfidenceProcess: Procedure to quantify confidence in a given prediction
-type ConfidenceProcess <: AbstractProcess
-    pred::PredictionProcess
+# Confidence: Procedure to quantify confidence in a given prediction
+type Confidence <: AbstractProcess
+    pred::Prediction
     conf::Vector{Conf}
 end
 
@@ -123,40 +125,34 @@ end
 # validate inputs
 
 # catch-all, runs if less-specific case is available.
-get_options{K<:Kernel, P <: Paramsel, R <: RLS}(kernal::K,paramsel::P,rls::R) = 
+get_options(::Kernel,::Paramsel,::RLS) = 
     error("Given training routine is not supported")
 
-get_options(kernel::Linear,paramsel::LOOCV,rls::Primal) =
+get_options(::Linear,::LOOCV,::Primal) =
     LinearOptions(100) # can pick nLambda intelligently later
 
-get_options(kernel::Linear,paramsel::LOOCV,rls::Dual) =
+get_options(::Linear,::LOOCV,::Dual) =
 	LinearOptions(100)
-
 
 ##############################################################################
 # Type to hold the results of an abstract process
 abstract AbstractResults
 
 function Base.print(io::IO,res::AbstractResults)
-	print(io,"$(typeof(res)) with:\n")
+	print(io,"$(typeof(res)) with:")
 	fields = names(res)
 	for field in fields
-		print(io,"\t$(field): $(typeof(res.(field)))\n")
+        println(io)
+		print(io,"\t$(field): $(typeof(res.(field)))")
 	end
 end
 Base.show(io::IO,res::AbstractResults) = print(io,res)
 
 ##############################################################################
 # Main routine that processes an experiment.
-function process(e::Experiment)
-	results = Array(AbstractResults,length(e.pipeline))
-	i = 1
-	for task in e.pipeline
-		results[i] = process(task)
-		i += 1
-	end
-	return results
-end
+process(e::Experiment) = map(process, e.pipeline)
+# Catch-all for undefined processes
+process(task) = error("Operation not defined for type $(typeof(task)).")
 
 include("utils.jl")
 include("kernel.jl")
@@ -164,9 +160,6 @@ include("model.jl")
 include("validation.jl")
 include("paramsel.jl")
 include("legacy.jl")
-
-# Catch-all for undefined processes
-process(task) = error("Operation not defined for type $(typeof(task)).")
 
 ##############################################################################
 

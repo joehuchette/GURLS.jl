@@ -15,7 +15,7 @@ function predict(model::LinearModel,X)
 	return X * model.w
 end
 
-function buildModel{P<:Paramsel}(train::TrainingProcess{Linear,P,Primal},lambda::Real)
+function buildModel{P<:Paramsel}(train::Training{Linear,P,Primal},lambda::Real)
 	# w = inv(train.X' * train.X + lambda * eye(size(train.X,2))) * train.X' * train.y
 
 	(n,d) = size(train.X)
@@ -27,7 +27,7 @@ function buildModel{P<:Paramsel}(train::TrainingProcess{Linear,P,Primal},lambda:
 	return LinearModel(vec(w))
 end
 
-function buildModel{P<:Paramsel,R<:Real}(train::TrainingProcess{Linear,P,Dual},lambda::Real,K::Array{R,2})
+function buildModel{P<:Paramsel,R<:Real}(train::Training{Linear,P,Dual},lambda::Real,K::Array{R,2})
 
 	n = size(train.X,1)
 
