@@ -6,6 +6,12 @@ yTrain = readcsv("../data/yTrain.csv")
 xTest = readcsv("../data/xTest.csv")
 yTest = readcsv("../data/yTest.csv")
 
+xMeans = mean(xTrain,1)
+for i in 1:size(xTrain,1)
+	xTrain[i,:] -= xMeans
+	xTest[i,:] -= xMeans
+end
+
 expr = Experiment()
 
 proc1 = TrainingProcess(xTrain,yTrain,kernel = Linear, rls = Primal)

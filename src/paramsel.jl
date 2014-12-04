@@ -31,6 +31,7 @@ performance = zeros(train.options.nLambda)
 i = 1
 for lambda in guesses
 	performance[i] = validate(train,lambda)
+	println(performance[i])
 	i += 1
 end
 

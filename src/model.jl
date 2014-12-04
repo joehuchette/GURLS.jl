@@ -24,6 +24,8 @@ function buildModel{P<:Paramsel}(train::TrainingProcess{Linear,P,Primal},lambda:
 	cholfact!(XtX)
 	w = XtX\(XtX'\Xty)
 
+	# println("Primal: ",w)
+
 	return LinearModel(vec(w))
 end
 
@@ -36,6 +38,8 @@ function buildModel{P<:Paramsel}(train::TrainingProcess{Linear,P,Dual},lambda::R
 	cholfact!(K)
 
 	w = train.X' * (K\(K'\train.y))
+
+	# println("Dual: ",w)
 
 	return LinearModel(vec(w))
 

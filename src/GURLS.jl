@@ -158,15 +158,17 @@ function process(e::Experiment)
 	return results
 end
 
+include("kernel.jl")
+include("model.jl")
+include("validation.jl")
+include("paramsel.jl")
+
 # Catch-all for undefined processes
 process{T<:AbstractProcess}(task::T) = error("Operation not defined for type $(typeof(task)).")
 
 ##############################################################################
 
-include("kernel.jl")
-include("model.jl")
-include("validation.jl")
-include("paramsel.jl")
+
 
 
 end # Module
