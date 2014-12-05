@@ -23,29 +23,6 @@ end
 Base.show(io::IO,res::AbstractProcess) = print(io,res)
 
 ###############################################################################
-# Experiment: Pipeline for a series of processes (training, testing, etc.)
-type Experiment
-    pipeline::Vector{AbstractProcess}
-    options
-end
-Experiment() = Experiment(AbstractProcess[],nothing)
-function Experiment(args...)
-    ex = Experiment()
-    for arg in args
-        if isa(arg, AbstractProcess)
-            push!(ex.pipeline, arg)
-        elseif isa(arg, AbstractOptions)
-            ex.options = arg
-        else
-            error("Unexpected argument of type $(typeof(arg))")
-        end
-    end
-    return ex
-end
-
-Base.push!(x::Experiment,y::AbstractProcess) = push!(x.pipeline,y)
-
-###############################################################################
 # AbstractTask: What GURLS defines as a "task"
 abstract AbstractTask
 
@@ -74,6 +51,7 @@ abstract Conf <: AbstractTask
 # Classes to hold options for model building
 
 abstract AbstractOptions
+type EmptyOption <: AbstractOptions end
 
 function Base.print(io::IO,res::AbstractOptions)
 	print(io,"$(typeof(res)) with:")
@@ -93,6 +71,31 @@ type GaussianOptions <: AbstractOptions
 	nLambda::Int
 	nSigma::Int
 end
+
+###############################################################################
+# Experiment: Pipeline for a series of processes (training, testing, etc.)
+type Experiment
+    pipeline::Vector{AbstractProcess}
+    options::AbstractOptions
+
+    function Experiment(args...)
+        procs = AbstractProcess[]
+        opt = EmptyOption()
+        for arg in args
+            if isa(arg, AbstractProcess)
+                push!(procs, arg)
+            elseif isa(arg, AbstractOptions)
+                opt = arg
+            else
+                error("Unexpected argument of type $(typeof(arg))")
+            end
+        end
+        return new(procs, opt)
+    end
+end
+
+Base.push!(x::Experiment,y::AbstractProcess) = push!(x.pipeline,y)
+
 
 ###############################################################################
 # Training: Procedure to train data (X,y) using a given kernel, 
