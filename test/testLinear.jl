@@ -17,7 +17,11 @@ dual   = Training(xTrain, yTrain, kernel = Linear(), rls = Dual())
 primalpred = Prediction(primal, xTest)
 dualpred   = Prediction(dual,   xTest)
 
-ex = Experiment(primal, dual, primalpred, dualpred)
+# ex = Experiment(primal, dual, primalpred, dualpred)
+# ex = Experiment(primal, dual)
+ex = Experiment()
+push!(ex,primal)
+push!(ex,dual)
 res = process(ex)
 
 m = res[1].model

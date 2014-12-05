@@ -43,7 +43,7 @@ function Experiment(args...)
     return ex
 end
 
-Base.push!{P<:AbstractProcess}(x::Experiment,y::P) = push!(x.pipeline,y)
+Base.push!(x::Experiment,y::AbstractProcess) = push!(x.pipeline,y)
 
 ###############################################################################
 # AbstractTask: What GURLS defines as a "task"
