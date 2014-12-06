@@ -85,13 +85,8 @@ function process{Kern<:Kernel}(train::Training{Kern,LOOCV,Dual})
 	_,best = findmin(min(performance,1)) # find best value for kernArgs
 
 	if Kern != Linear
-<<<<<<< HEAD
-		K = buildKernel(train,kernelSpace[best])
-		guesses = []
-=======
 		K = buildKernel(train,kernArgs[best])
 		guesses = kernArgs
->>>>>>> 507cb556d4d0487002eb6b794b97987f2b2b2bb3
 	end
 
 	# Build the final model-- might as well use all of the training set.
