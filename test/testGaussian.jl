@@ -12,11 +12,6 @@ for i in 1:size(xTrain,1)
 	xTest[i,:] -= xMeans
 end
 
-ex = Experiment()
-
-#primal = Training(xTrain, yTrain, kernel = Linear(), rls = Primal())
-#push!(expr, primal)
-
 dual = Training(xTrain, yTrain, kernel = Gaussian(), rls = Dual())
 pred = Prediction(dual, xTest)
 perf = Performance(pred, yTest, MacroAvg())
@@ -24,3 +19,8 @@ perf = Performance(pred, yTest, MacroAvg())
 ex = Experiment(dual, pred, perf)
 
 res = process(ex)
+m = res[dual].model
+
+pred = sign(predict(m,xTest))
+nCorrect = sum(pred .== yTest)
+println("Gaussian: $(100*nCorrect/size(xTest,1))%")
