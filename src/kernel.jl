@@ -22,6 +22,7 @@ function buildKernel(train::Training{Gaussian,LOOCV,Dual},sigma)
 	return k
 end
 
+<<<<<<< HEAD
 function getKernelSpace(k,train::Training)
 	if k == Linear
 		return [()]
@@ -46,3 +47,8 @@ function getKernelSpace(k,train::Training)
 		error("Unknown Kernel")
 	end
 end
+=======
+getKernelSpace{P<:Paramsel}(train::Training{Linear,P,Dual}) = [()]
+getKernelSpace{P<:Paramsel}(train::Training{Gaussian,P,Dual}) = error("Not yet implemented")
+getKernelSpace(x) = error("Unknown kernel of type $(typeof(x))")
+>>>>>>> 507cb556d4d0487002eb6b794b97987f2b2b2bb3

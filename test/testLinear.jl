@@ -3,24 +3,26 @@ using GURLS
 
 xTrain = readcsv("../data/xTrain.csv")
 yTrain = readcsv("../data/yTrain.csv")
-xTest = readcsv("../data/xTest.csv")
-yTest = readcsv("../data/yTest.csv")
+xTest  = readcsv("../data/xTest.csv")
+yTest  = readcsv("../data/yTest.csv")
 
 xMeans = mean(xTrain,1)
 for i in 1:size(xTrain,1)
 	xTrain[i,:] -= xMeans
-	xTest[i,:] -= xMeans
+	xTest[i,:]  -= xMeans
 end
 
-expr = Experiment()
-
 primal = Training(xTrain, yTrain, kernel = Linear(), rls = Primal())
-push!(expr, primal)
+dual   = Training(xTrain, yTrain, kernel = Linear(), rls = Dual())
+primalpred = Prediction(primal, xTest)
+dualpred   = Prediction(dual,   xTest)
 
-dual = Training(xTrain, yTrain, kernel = Linear(), rls = Dual())
-push!(expr, dual)
-
-res = process(expr)
+# ex = Experiment(primal, dual, primalpred, dualpred)
+# ex = Experiment(primal, dual)
+ex = Experiment()
+push!(ex,primal)
+push!(ex,dual)
+res = process(ex)
 
 m = res[1].model
 
