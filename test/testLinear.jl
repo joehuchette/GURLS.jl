@@ -16,21 +16,9 @@ primal = Training(xTrain, yTrain, kernel = Linear(), rls = Primal())
 dual   = Training(xTrain, yTrain, kernel = Linear(), rls = Dual())
 primalpred = Prediction(primal, xTest)
 dualpred   = Prediction(dual,   xTest)
+primalperf = Performance(primalpred, yTest, MacroAvg())
+dualperf   = Performance(dualpred,   yTest, MacroAvg())
 
-# ex = Experiment(primal, dual, primalpred, dualpred)
-# ex = Experiment(primal, dual)
-ex = Experiment()
-push!(ex,primal)
-push!(ex,dual)
+ex = Experiment(primal, dual, primalpred, dualpred, primalperf, dualperf)
+
 res = process(ex)
-
-m = res[1].model
-
-pred = sign(predict(m,xTest))
-nCorrect = sum(pred .== yTest)
-println("Primal: $(100*nCorrect/size(xTest,1))%")
-
-m = res[2].model
-pred = sign(predict(m,xTest))
-nCorrect = sum(pred .== yTest)
-println("Dual: $(100* nCorrect/size(xTest,1))%")

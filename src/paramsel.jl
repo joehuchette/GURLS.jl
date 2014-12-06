@@ -39,9 +39,7 @@ function process(train::Training{Linear,LOOCV,Primal})
 	# Build the final model-- might as well use all of the training set.
 	model = buildModel(train,lambdaBest)
 
-	results = ParamselResults(model,guesses,performance)
-	return results
-
+	return ParamselResults(model,guesses,performance)
 end
 
 
@@ -92,8 +90,7 @@ function process{Kern<:Kernel}(train::Training{Kern,LOOCV,Dual})
 	# Build the final model-- might as well use all of the training set.
 	model = buildModel(train,lambdaBests[best],K)
 
-	results = ParamselResults(model,guesses,performance)
-	return results
+	return ParamselResults(model,guesses,performance)
 end
 
 function getLambdaGuesses(eig,rank,n,nLambda)
@@ -105,7 +102,6 @@ function getLambdaGuesses(eig,rank,n,nLambda)
 
 	powers = linspace(0,1,nLambda)
 	guesses = lmin.*(lmax/lmin).^(powers)
-	guesses = guesses/n
 
-	return guesses
+	return guesses / n
 end

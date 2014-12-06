@@ -4,7 +4,7 @@ importall Base
 
 export AbstractProcess, Experiment, AbstractTask, Kernel, Linear, RLS, Primal,
        Dual, Paramsel, LOOCV, Pred, Perf, Conf, Training, 
-       Prediction, Performance, Confidence,
+       Prediction, MacroAvg, Performance, Confidence,
        process, predict
 
 ###############################################################################
@@ -87,7 +87,8 @@ function Training(X, y; kernel   = Linear(),
 end
 
 ###############################################################################
-# Prediction: Procedure to predict on test data, given a training run
+# Prediction: Procedure to predict on test data, given a model built through
+# a training run
 type Prediction <: AbstractProcess
     training::Training
     X
@@ -95,19 +96,20 @@ end
 
 ###############################################################################
 # Performance: Procedure to assess performance of a given prediction
-type Performance <: AbstractProcess
+type Performance{Perf} <: AbstractProcess
     pred::Prediction
-    perf::Vector{Perf}
+    ytrue
+    # perf::Perf
 end
-Performance(pred::Prediction, args::Perf...) = Performance(pred, collect(args))
+Performance{P<:Perf}(pred::Prediction, ytrue, perf::P) = Performance{P}(pred,ytrue) 
 
 ###############################################################################
 # Confidence: Procedure to quantify confidence in a given prediction
-type Confidence <: AbstractProcess
+type Confidence{Conf} <: AbstractProcess
     pred::Prediction
-    conf::Vector{Conf}
+    # conf::Conf
 end
-Confidence(pred::Prediction, args::Conf...) = Confidence(pred, collect(args))
+Confidence(pred::Prediction, conf::Conf) = Confidence{Conf}(pred)
 
 ##############################################################################
 # Type to hold the results of an abstract process
@@ -126,7 +128,16 @@ Base.show(io::IO,res::AbstractResults) = print(io,res)
 ##############################################################################
 # Main routine that processes an experiment.
 process(e::Experiment) = map(process, e.pipeline)
+function process(e::Experiment)
+    res = Dict{AbstractProcess,Any}()
+    for proc in e.pipeline
+        res[proc] = process(proc, res)
+    end
+    return res
+end
+
 # Catch-all for undefined processes
+process(a,b) = process(a)
 process(task) = error("Operation not defined for type $(typeof(task)).")
 
 include("utils.jl")
@@ -134,6 +145,7 @@ include("kernel.jl")
 include("model.jl")
 include("validation.jl")
 include("paramsel.jl")
+include("performance.jl")
 include("legacy.jl")
 
 ##############################################################################

@@ -8,7 +8,7 @@ predict{T<:AbstractModel}(model::T) =
 ##############################################################################
 # Linear model definition and building
 type LinearModel{T<:Real} <: AbstractModel
-	w::Array{T,1} # should be 2D to avoid recasting in eval method below
+	w::Vector{T}
 end
 
 function predict(model::LinearModel,X)
@@ -40,3 +40,5 @@ function buildModel{P<:Paramsel,R<:Real}(train::Training{Linear,P,Dual},lambda::
 	return LinearModel(vec(w))
 
 end
+
+process(p::Prediction, results) = predict(results[p.training].model, p.X)

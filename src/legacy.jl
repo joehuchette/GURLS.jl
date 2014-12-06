@@ -142,7 +142,7 @@ function gurls(X, y, opt::LegacyExperiment, id)
         end
     end
     if !isempty!(tdesc.pred)
-        prediction = Prediction(training, X, y)
+        prediction = Prediction(training, X)
         push!(opt.exper, prediction)
     else
         try
@@ -152,17 +152,15 @@ function gurls(X, y, opt::LegacyExperiment, id)
         end
     end
 
-    if !isempty(tdesc.perf)
-        perf = PerformancProcess(prediction, collect(tdesc.perf))
+    for p in tdesc.perf
+        perf = Performance(prediction, y, p)
         push!(opt.exper, perf)
-        process(perf)
     end
-    if !isempty(tdesc.conf)
-        conf = Confidence(prediction, collect(tdesc.conf))
+    for c in tdesc.conf
+        conf = Confidence(prediction, c)
         push!(opt.exper, conf)
-        process(conf)
     end
-    return nothing
+    return process(opt.exper)
 end
 
 const gurls_funcs = [
@@ -201,10 +199,10 @@ const gurls_funcs = [
     #("rls","gpregr")                 => error("Task not yet implemented"),
     #("predkernel","traintest")       => error("Task not yet implemented"),
     ("pred","primal")                => TaskDescriptor(rls=Primal()),
-    ("pred","dual")                  => TaskDescriptor(rls=Dual())
+    ("pred","dual")                  => TaskDescriptor(rls=Dual()),
     #("pred","randfeats")             => error("Task not yet implemented"),
     #("pred","gpregr")                => error("Task not yet implemented"),
-    #("perf","macroavg")              => error("Task not yet implemented"),
+    ("perf","macroavg")              => TaskDescriptor()
     #("perf","precrec")               => error("Task not yet implemented"),
     #("perf","rmse")                  => error("Task not yet implemented"),
     #("perf","abserr")                => error("Task not yet implemented"),
