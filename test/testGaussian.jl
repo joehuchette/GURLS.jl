@@ -1,10 +1,10 @@
 # A bare bones test to quickly route out syntax errors
 using GURLS
 
-xTrain = readcsv("../data/xTrain.csv")
-yTrain = readcsv("../data/yTrain.csv")
-xTest = readcsv("../data/xTest.csv")
-yTest = readcsv("../data/yTest.csv")
+xTrain = readcsv(Pkg.dir("GURLS") * "/data/xTrain.csv")
+yTrain = readcsv(Pkg.dir("GURLS") * "/data/yTrain.csv")
+xTest  = readcsv(Pkg.dir("GURLS") * "/data/xTest.csv")
+yTest  = readcsv(Pkg.dir("GURLS") * "/data/yTest.csv")
 
 xMeans = mean(xTrain,1)
 for i in 1:size(xTrain,1)
@@ -12,18 +12,15 @@ for i in 1:size(xTrain,1)
 	xTest[i,:] -= xMeans
 end
 
-expr = Experiment()
+ex = Experiment()
 
 #primal = Training(xTrain, yTrain, kernel = Linear(), rls = Primal())
 #push!(expr, primal)
 
 dual = Training(xTrain, yTrain, kernel = Gaussian(), rls = Dual())
-push!(expr, dual)
+pred = Prediction(dual, xTest)
+perf = Performance(pred, yTest, MacroAvg())
 
-res = process(expr)
+ex = Experiment(dual, pred, perf)
 
-m = res[1].model
-
-pred = sign(predict(m,xTest))
-nCorrect = sum(pred .== yTest)
-println("Gaussian: $(100*nCorrect/size(xTest,1))%")
+res = process(ex)
