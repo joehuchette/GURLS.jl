@@ -22,3 +22,6 @@ dualperf   = Performance(dualpred,   yTest, MacroAvg())
 ex = Experiment(primal, dual, primalpred, dualpred, primalperf, dualperf)
 
 res = process(ex)
+
+println("Primal Performance: $(res[primalperf])")
+println("Dual   Performance: $(res[dualperf])")
