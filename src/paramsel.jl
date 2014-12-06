@@ -39,7 +39,7 @@ function process(train::Training{Linear,LOOCV,Primal})
 	# Build the final model-- might as well use all of the training set.
 	model = buildModel(train,lambdaBest)
 
-	return ParamselResults(model,guesses,performance)
+	return ParamselResults(model,guesses,performance')
 end
 
 
@@ -93,7 +93,7 @@ function process{Kern<:Kernel}(train::Training{Kern,LOOCV,Dual})
 	# Build the final model-- might as well use all of the training set.
 	model = buildModel(train,lambdaBests[best],K,kernArgs...)
 
-	return ParamselResults(model,[guesses],performance)
+	return ParamselResults(model,[guesses],performance')
 
 end
 
