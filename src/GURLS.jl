@@ -29,8 +29,18 @@ abstract AbstractTask
 ###############################################################################
 # Kernel: Kernel type used in prediction
 abstract Kernel <: AbstractTask
-type Linear <: Kernel end
-type Gaussian <: Kernel end
+type Linear <: Kernel 
+    nLambda::Int
+end
+Linear() = Linear(100)
+type Gaussian <: Kernel
+    nLambda::Int
+    nSigma::Int
+end
+Gaussian() = Gaussian(100,100)
+
+num_lambda(a::Linear) = a.nLambda
+num_lambda(a::Gaussian) = a.nLambda
 
 ###############################################################################
 # RLS: Formulation type used in prediction
@@ -45,53 +55,16 @@ type LOOCV <: Paramsel end
 
 abstract Pred <: AbstractTask
 abstract Perf <: AbstractTask
+type MacroAvg <: Perf end
 abstract Conf <: AbstractTask
-
-###############################################################################
-# Classes to hold options for model building
-
-abstract AbstractOptions
-type EmptyOption <: AbstractOptions end
-
-function Base.print(io::IO,res::AbstractOptions)
-	print(io,"$(typeof(res)) with:")
-	fields = names(res)
-	for field in fields
-        println(io)
-		print(io,"\t$(field): $(res.(field))")
-	end
-end
-Base.show(io::IO,res::AbstractOptions) = print(io,res)
-
-type LinearOptions <: AbstractOptions
-	nLambda::Int
-end
-
-type GaussianOptions <: AbstractOptions
-	nLambda::Int
-	nSigma::Int
-end
 
 ###############################################################################
 # Experiment: Pipeline for a series of processes (training, testing, etc.)
 type Experiment
     pipeline::Vector{AbstractProcess}
-    options::AbstractOptions
+    options
 
-    function Experiment(args...)
-        procs = AbstractProcess[]
-        opt = EmptyOption()
-        for arg in args
-            if isa(arg, AbstractProcess)
-                push!(procs, arg)
-            elseif isa(arg, AbstractOptions)
-                opt = arg
-            else
-                error("Unexpected argument of type $(typeof(arg))")
-            end
-        end
-        return new(procs, opt)
-    end
+    Experiment(args...) = new(collect(args), nothing)
 end
 
 Base.push!(x::Experiment,y::AbstractProcess) = push!(x.pipeline,y)
@@ -103,17 +76,14 @@ Base.push!(x::Experiment,y::AbstractProcess) = push!(x.pipeline,y)
 type Training{K<:Kernel,P<:Paramsel,T<:RLS} <: AbstractProcess
     X
     y
-    options::AbstractOptions # hold parameters for model building-- ie nLambda
+    kernel::K
+    paramsel::P
+    rls::T
 end
-
-function Training{K<:Kernel,P<:Paramsel,T<:RLS}(X, y; kernel::K   = Linear(),
-                                                      paramsel::P = LOOCV(),
-                                                      rls::T      = Primal())
-    options = get_options(kernel,paramsel,rls) # need to actually call constructors,
-    												 # otherwise it passes the datatypes 
-    												 # themselves, which can't be used for 
-    												 # comparison, type hierarchy, etc
-    return Training{K,P,T}(X,y,options)
+function Training(X, y; kernel   = Linear(),
+                        paramsel = LOOCV(),
+                        rls      = Primal())
+    return Training(X,y,kernel,paramsel,rls)
 end
 
 ###############################################################################
@@ -138,23 +108,6 @@ type Confidence <: AbstractProcess
     conf::Vector{Conf}
 end
 Confidence(pred::Prediction, args::Conf...) = Confidence(pred, collect(args))
-
-###############################################################################
-# Returns the desired options structure based on types given--- also serves to 
-# validate inputs
-
-# catch-all, runs if less-specific case is available.
-get_options(::Kernel,::Paramsel,::RLS) = 
-    error("Given training routine is not supported")
-
-get_options(::Linear,::LOOCV,::Primal) =
-    LinearOptions(100) # can pick nLambda intelligently later
-
-get_options(::Linear,::LOOCV,::Dual) =
-	LinearOptions(100)
-
-get_options(::Gaussian,::LOOCV,::Dual) =
-	GaussianOptions(100,100)
 
 ##############################################################################
 # Type to hold the results of an abstract process

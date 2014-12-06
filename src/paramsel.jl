@@ -15,13 +15,13 @@ function process(train::Training{Linear,LOOCV,Primal})
 
 	(L,Q) = eig(XX)
 
-	guesses = getLambdaGuesses(L,min(n,d),n,train.options.nLambda)
+	guesses = getLambdaGuesses(L,min(n,d),n,num_lambda(train.kernel))
 
 	LEFT = train.X * Q
 	RIGHT = Q' * Xy
 
 	# pre-allocate memory
-	performance = zeros(train.options.nLambda)
+	performance = zeros(num_lambda(train.kernel))
 
 	# Test all values for lambda
 	i = 1
@@ -52,7 +52,7 @@ function process{Kern<:Kernel}(train::Training{Kern,LOOCV,Dual})
 	kernelSpace = getKernelSpace(train)
 
 	# pre-allocate memory
-	performance = zeros(train.options.nLambda,length(kernelSpace))
+	performance = zeros(num_lambda(train.kernel),length(kernelSpace))
 	lambdaBests = zeros(length(kernelSpace))
 	j = 1
 	for kernArgs in kernelSpace
@@ -64,7 +64,7 @@ function process{Kern<:Kernel}(train::Training{Kern,LOOCV,Dual})
 		r = rank(train.X)
 		Qy = Q' * train.y
 
-		guesses = getLambdaGuesses(L,r,n,train.options.nLambda)
+		guesses = getLambdaGuesses(L,r,n,num_lambda(train.kernel))
 
 		# Test all values for lambda
 		i = 1
