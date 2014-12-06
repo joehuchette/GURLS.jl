@@ -3,7 +3,7 @@ module GURLS
 importall Base
 
 export AbstractProcess, Experiment, AbstractTask, Kernel, Linear, RLS, Primal,
-       Dual, Paramsel, LOOCV, Pred, Perf, Conf, Training, 
+       Dual, Paramsel, LOOCV, Pred, Perf, Conf, Training, Gaussian,
        Prediction, Performance, Confidence,
        process, predict
 
@@ -76,6 +76,11 @@ type LinearOptions <: AbstractOptions
 	nLambda::Int
 end
 
+type GaussianOptions <: AbstractOptions
+	nLambda::Int
+	nSigma::Int
+end
+
 ###############################################################################
 # Training: Procedure to train data (X,y) using a given kernel, 
 #                  parameter selection procedure, and formulation type
@@ -130,6 +135,9 @@ get_options(::Linear,::LOOCV,::Primal) =
 
 get_options(::Linear,::LOOCV,::Dual) =
 	LinearOptions(100)
+
+get_options(::Gaussian,::LOOCV,::Dual) =
+	GaussianOptions(20,25)
 
 ##############################################################################
 # Type to hold the results of an abstract process
