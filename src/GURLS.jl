@@ -70,7 +70,6 @@ end
 
 Base.push!(x::Experiment,y::AbstractProcess) = push!(x.pipeline,y)
 
-s
 ###############################################################################
 # Training: Procedure to train data (X,y) using a given kernel, 
 #                  parameter selection procedure, and formulation type
