@@ -3,7 +3,7 @@
 module Legacy
 
 using ..GURLS
-using ..GURLS: AbstractResults, AbstractModel, ParamselResults
+using ..GURLS: AbstractResults, AbstractModel, Kernel, Paramsel, RLS, ParamselResults, Pred, Perf, Conf
 
 export defopt, gurls
 

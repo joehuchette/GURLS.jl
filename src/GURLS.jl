@@ -2,8 +2,8 @@ module GURLS
 
 importall Base
 
-export AbstractProcess, Experiment, AbstractTask, Kernel, Linear, RLS, Primal,
-       Prediction, MacroAvg, Performance, Confidence,
+export AbstractProcess, Experiment, AbstractTask, Kernel, Linear, RLS, LOOCV, Primal, Dual,
+       Training, Prediction, MacroAvg, Performance, Confidence,
        process, predict
 
 ###############################################################################
@@ -36,10 +36,11 @@ type Gaussian <: Kernel
     nLambda::Int
     nSigma::Int
 end
-Gaussian() = Gaussian(100,100)
+Gaussian() = Gaussian(20,25)
 
 num_lambda(a::Linear) = a.nLambda
 num_lambda(a::Gaussian) = a.nLambda
+num_sigma(a::Gaussian) = a.nSigma
 
 ###############################################################################
 # RLS: Formulation type used in prediction
@@ -67,12 +68,6 @@ type Experiment
 end
 
 Base.push!(x::Experiment,y::AbstractProcess) = push!(x.pipeline,y)
-
-
-type GaussianOptions <: AbstractOptions
-	nLambda::Int
-	nSigma::Int
-end
 
 ###############################################################################
 # Training: Procedure to train data (X,y) using a given kernel, 

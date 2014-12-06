@@ -40,8 +40,8 @@ function getKernelSpace{P<:Paramsel}(train::Training{Gaussian,P,Dual})
 		sigmamax = eps();
 	end
 
-	q = (sigmamax/sigmamin)^(1/(train.options.nSigma-1));
-	return sigmamin*(q.^(train.options.nSigma-1:-1:0));
+	q = (sigmamax/sigmamin)^(1/(num_sigma(train.kernel)-1));
+	return sigmamin*(q.^(num_sigma(train.kernel)-1:-1:0));
 end
 
 getKernelSpace(x) = error("Unknown kernel of type $(typeof(x))")
