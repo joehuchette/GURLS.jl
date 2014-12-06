@@ -12,17 +12,16 @@ for i in 1:size(xTrain,1)
 	xTest[i,:] -= xMeans
 end
 
-expr = Experiment()
-
 #primal = Training(xTrain, yTrain, kernel = Linear(), rls = Primal())
 #push!(expr, primal)
 
 dual = Training(xTrain, yTrain, kernel = Gaussian(), rls = Dual())
-push!(expr, dual)
+
+expr = Experiment(dual)
 
 res = process(expr)
 
-m = res[1].model
+m = res[dual].model
 
 pred = sign(predict(m,xTest))
 nCorrect = sum(pred .== yTest)
