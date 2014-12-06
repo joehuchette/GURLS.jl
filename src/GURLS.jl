@@ -5,7 +5,7 @@ importall Base
 export AbstractProcess, Experiment, AbstractTask, Kernel, Linear, Gaussian, 
        RLS, LOOCV, Primal, Dual,
        Training, Prediction, MacroAvg, Performance, Confidence,
-       process, predict
+       process, predict, train
 
 ###############################################################################
 # AbstractProcess: Abstract type for a process in the experiment 
@@ -37,7 +37,8 @@ type Gaussian <: Kernel
     nLambda::Int
     nSigma::Int
 end
-Gaussian() = Gaussian(20,25)
+
+Gaussian() = Gaussian(100,5)
 
 num_lambda(a::Linear) = a.nLambda
 num_lambda(a::Gaussian) = a.nLambda
@@ -150,6 +151,7 @@ include("validation.jl")
 include("paramsel.jl")
 include("performance.jl")
 include("legacy.jl")
+# include("RInterface.jl")
 
 ##############################################################################
 

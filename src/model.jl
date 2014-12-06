@@ -27,18 +27,44 @@ function buildModel{P<:Paramsel}(train::Training{Linear,P,Primal},lambda::Real)
 	return LinearModel(vec(w))
 end
 
+
 function buildModel{P<:Paramsel,R<:Real}(train::Training{Linear,P,Dual},lambda::Real,K::Array{R,2})
 
+	w = train.X' * getC(train,lambda,K)
+
+	return LinearModel(vec(w))
+
+end
+
+function getC{R<:Real,Kern<:Kernel,P<:Paramsel}(train::Training{Kern,P,Dual},lambda::Real,K::Array{R,2})
 	n = size(train.X,1)
 
 	K += n * lambda * eye(n)
 
 	kFact = chol(K)
 
-	w = train.X' * (kFact\(kFact'\train.y))
+	c = kFact\(kFact'\train.y)
 
-	return LinearModel(vec(w))
-
+	return vec(c)
 end
 
 process(p::Prediction, results) = predict(results[p.training].model, p.X)
+
+##############################################################################
+# Gaussian model definition and building
+
+type GaussianModel{T<:Real} <: AbstractModel
+	c::Array{T,1} 
+	sigma::Real
+end
+
+function predict(model::GaussianModel,X)
+	t = Training(X,ones(size(X,1)),kernel = Gaussian(), rls = Dual())
+	k = buildKernel(t,model.sigma)
+	return k * model.c
+end
+
+function buildModel{P<:Paramsel,R<:Real}(train::Training{Gaussian,P,Dual},lambda::Real,K::Array{R,2},sigma)
+	return GaussianModel(getC(train,lambda,K),sigma)
+end
+
