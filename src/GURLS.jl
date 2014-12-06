@@ -2,7 +2,8 @@ module GURLS
 
 importall Base
 
-export AbstractProcess, Experiment, AbstractTask, Kernel, Linear, RLS, LOOCV, Primal, Dual,
+export AbstractProcess, Experiment, AbstractTask, Kernel, Linear, Gaussian, 
+       RLS, LOOCV, Primal, Dual,
        Training, Prediction, MacroAvg, Performance, Confidence,
        process, predict, train
 
