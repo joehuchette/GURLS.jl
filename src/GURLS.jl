@@ -3,7 +3,6 @@ module GURLS
 importall Base
 
 export AbstractProcess, Experiment, AbstractTask, Kernel, Linear, RLS, Primal,
-       Dual, Paramsel, LOOCV, Pred, Perf, Conf, Training, 
        Prediction, MacroAvg, Performance, Confidence,
        process, predict
 
@@ -70,6 +69,11 @@ end
 Base.push!(x::Experiment,y::AbstractProcess) = push!(x.pipeline,y)
 
 
+type GaussianOptions <: AbstractOptions
+	nLambda::Int
+	nSigma::Int
+end
+
 ###############################################################################
 # Training: Procedure to train data (X,y) using a given kernel, 
 #                  parameter selection procedure, and formulation type
@@ -110,6 +114,9 @@ type Confidence{Conf} <: AbstractProcess
     # conf::Conf
 end
 Confidence(pred::Prediction, conf::Conf) = Confidence{Conf}(pred)
+
+get_options(::Gaussian,::LOOCV,::Dual) =
+	GaussianOptions(20,25)
 
 ##############################################################################
 # Type to hold the results of an abstract process

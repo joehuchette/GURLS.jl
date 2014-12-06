@@ -1,10 +1,10 @@
-function buildKernel(data::Training{Linear,LOOCV,Dual})
-	k = data.X * data.X'
+function buildKernel(train::Training{Linear,LOOCV,Dual})
+	k = train.X * train.X'
 	return k
 end
 
-function buildKernel(data::Training{Gaussian,LOOCV,Dual},sigma)
-	(n,d) = size(data.X)
+function buildKernel(train::Training{Gaussian,LOOCV,Dual},sigma)
+	(n,d) = size(train.X)
 
 	k = zeros(n,n) # malloc
 	coef = 1/(sqrt(2 * pi) * sigma) ^ d
@@ -22,6 +22,27 @@ function buildKernel(data::Training{Gaussian,LOOCV,Dual},sigma)
 	return k
 end
 
+
 getKernelSpace{P<:Paramsel}(train::Training{Linear,P,Dual}) = [()]
-getKernelSpace{P<:Paramsel}(train::Training{Gaussian,P,Dual}) = error("Not yet implemented")
+
+function getKernelSpace{P<:Paramsel}(train::Training{Gaussian,P,Dual})
+	kerneldistance = square_distance(train.X',train.X')
+	n = size(kerneldistance,1)
+
+	dists = sort(vec(tril(kerneldistance,-1)))[(n^2+n+2)/2:end]
+	sigmamin = dists[round(0.5 + length(dists) * 0.1)]
+	sigmamax = maximum(dists)
+
+	if sigmamin <= 0
+		sigmamin = eps();
+	end
+	if sigmamax <= 0
+		sigmamax = eps();
+	end
+
+	q = (sigmamax/sigmamin)^(1/(train.options.nSigma-1));
+	return sigmamin*(q.^(train.options.nSigma-1:-1:0));
+end
+
 getKernelSpace(x) = error("Unknown kernel of type $(typeof(x))")
+
