@@ -3,7 +3,7 @@
 type ParamselResults{T<:Real} <: AbstractResults
 	model::AbstractModel
 	guesses::Array # Can contain tuples for sig/lam selection
-	performance::Array{T}
+	performance::Array{T,2}
 end
 
 ##############################################################################
@@ -67,7 +67,6 @@ function process{Kern<:Kernel}(train::Training{Kern,LOOCV,Dual})
 		# Test all values for lambda
 		i = 1
 		for lambda in guesses
-			# performance[i] = validate(train,lambda)
 			performance[i,j] = validateDual(Q,L,Qy,lambda,train.y)[1]
 			# println(performance[i])
 			i += 1
@@ -82,15 +81,20 @@ function process{Kern<:Kernel}(train::Training{Kern,LOOCV,Dual})
 
 	_,best = findmin(min(performance,1)) # find best value for kernArgs
 
+	# Need to build nonlinear kernels. Also record what kernargs we're using
 	if Kern != Linear
-		K = buildKernel(train,kernArgs[best])
+		kernArgs = kernelSpace[best]
+		K = buildKernel(train,kernArgs)
 		guesses = kernArgs
+	else
+		kernelArgs = ()
 	end
 
 	# Build the final model-- might as well use all of the training set.
-	model = buildModel(train,lambdaBests[best],K)
+	model = buildModel(train,lambdaBests[best],K,kernArgs...)
 
-	return ParamselResults(model,guesses,performance)
+	return ParamselResults(model,[guesses],performance)
+
 end
 
 function getLambdaGuesses(eig,rank,n,nLambda)
