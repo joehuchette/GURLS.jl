@@ -1,0 +1,50 @@
+importall DataFrames
+
+type Model <: AbstractResults
+	innerModel::AbstractResults
+	xMean::Array{Real,1}
+	yMean::Real
+	formula::Formula
+end
+
+function train(model::Formula; data = [], kernel = Linear(), validation = LOOCV(), method = Primal())
+	@assert !isempty(data) "No data specified-- call with data=[your dataframe]"
+
+	modelMatrix = ModelMatrix(ModelFrame(model,data))
+
+	x = modelMatrix.m[:,2:end] # get the data out of this, but ignore offset term. 
+
+	y = (data[model.lhs]).data
+
+	xMean = mean(x,1)
+	yMean = mean(y)
+
+	for i in 1:size(x,1)
+		x[i,:] -= xMean'' #double transpose to make row vector
+		y[i] -= yMean
+	end
+
+	tr = Training(x,y,kernel = kernel, paramsel = validation, rls = method)
+
+	ex = Experiment(tr)
+
+	res = process(ex)
+
+	return Model(res[1].model,xMean,yMean,formula), res[1]
+end
+
+function predict(model::Model,data::DataFrame)
+	modelMatrix = ModelMatrix(ModelFrame(model,data))
+
+	x = modelMatrix.m[:,2:end] # get the data out of this, but ignore offset term.
+
+	for i in 1:size(x,1)
+		x[i,:] -= xMean'' #double transpose to make row vector
+	end
+
+	y = predict(model.innerModel,x)
+
+	y += yMean
+
+	return y
+end
