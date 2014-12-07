@@ -23,7 +23,7 @@ getKernelSpace{P<:Paramsel}(train::Training{Linear,P,Dual}) = [()]
 
 function getKernelSpace{G<:Gaussian,P<:Paramsel}(train::Training{G,P,Dual})
 	# kerneldistance = square_distance(train.X',train.X')
-	train.kernel.dists = pairwise(SqEuclidean(),train.X',train.X')
+	train.kernel.dists = pairwise(SqEuclidean(),train.X')
 	n = size(train.kernel.dists,1)
 
 	dists = sort(vec(tril(train.kernel.dists,-1)))[(n^2+n+2)/2:end]
