@@ -28,6 +28,6 @@ perf = Performance(pred, yTest, MacroAvg())
 
 ex = Experiment(dual, pred, perf)
 
-res = process(ex)
+@time res = process(ex)
 
 println("Gaussian: $(100*res[perf])%")

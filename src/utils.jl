@@ -1,6 +1,7 @@
-function GInverseDiagonal(Q::Matrix{Float64}, L, lambda::Real)
+function GInverseDiagonal(Q::Matrix{Float64}, L, lambda::Real, Z::Vector{Float64})
 	nx, ny = size(Q, 1), size(Q, 2)
-	Z = zeros(Float64, nx)
+	# Z = zeros(Float64, nx)
+	fill!(Z, 0.0)
 
 	# D = Q .^ 2
 
@@ -15,22 +16,7 @@ function GInverseDiagonal(Q::Matrix{Float64}, L, lambda::Real)
 	return Z
 end
 
-function GInverseDiagonal(Q::Matrix{Float64}, L, lambda)
-	n = size(Q,1)
-	t = size(lambda,2)
-	Z = zeros(Float64, n, t)
-
-	D = Q .^ 2
-	for i = 1:t
-	    d = L + (n*lambda[i])
-	    d = 1 ./ d
-	    Z[:,i] = D*d
-	end
-	
-	return Z	
-end
-
-function rls_eigen(Q, L, Qy, lambda, n)
+function rls_eigen(Q, L, Qy, lambda, n, C::Vector{Float64})
 	# Computes RLS estimator given the singular value decomposition of the
 	# kernel matrix
 	# 
@@ -48,15 +34,17 @@ function rls_eigen(Q, L, Qy, lambda, n)
 	# L += n*lambda
 	# diagL = diagm(1 ./ L)
 
-	ret = Array(Float64,n)
+	# ret = Array(Float64,n)
 	for i in 1:n
 		acc = 0.0
 		for j in 1:n
 			@inbounds acc += Q[i,j] * Qy[j]
 		end
-		@inbounds ret[i] = acc / (n * lambda * L[i])
+		@inbounds C[i] = acc / (n * lambda * L[i])
+		# @inbounds ret[i] = acc / (n * lambda * L[i])
 	end
-	return ret
+	# return ret
+	return C
 
 	# return Q * diagL * Qy
 end

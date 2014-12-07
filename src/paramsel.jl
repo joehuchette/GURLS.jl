@@ -48,6 +48,7 @@ function process{Kern<:Kernel}(train::Training{Kern,LOOCV,Dual})
 	# pre-allocate memory
 	performance = zeros(nlambda, length(kernelSpace))
 	lambdaBests = zeros(length(kernelSpace))
+
 	j = 1
 	for kernArgs in kernelSpace
 
@@ -58,12 +59,15 @@ function process{Kern<:Kernel}(train::Training{Kern,LOOCV,Dual})
 		r = rank(train.X)
 		Qy = Q' * train.y
 
+		C = Array(Float64, size(train.y,1))
+		Z = Array(Float64, size(Q,1))
+
 		guesses = getLambdaGuesses(L,r,n,nlambda)
 
 		# Test all values for lambda
 		i = 1
 		for lambda in guesses
-			performance[i,j] = validateDual(Q,L,Qy,lambda,train.y)[1]
+			performance[i,j] = validateDual(Q,L,Qy,lambda,train.y)
 			# println(performance[i])
 			i += 1
 		end

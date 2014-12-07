@@ -88,12 +88,18 @@ Base.push!(x::Experiment,y::AbstractProcess) = push!(x.pipeline,y)
 # Training: Procedure to train data (X,y) using a given kernel, 
 #                  parameter selection procedure, and formulation type
 type Training{K<:Kernel,P<:Paramsel,T<:RLS} <: AbstractProcess
-    X
-    y
+    X::Matrix
+    y::Vector
     kernel::K
     paramsel::P
     rls::T
 end
+
+function Training{K<:Kernel,P<:Paramsel,T<:RLS}(X::Array, y::Array, kernel::K, paramsel::P, rls::T)
+    size(y,2) == 1 || error("Multi-output learning not yet supported")
+    return Training(reshape(X,(size(X,1),size(X,2))), vec(y), kernel, paramsel, rls)
+end
+
 function Training(X, y; kernel   = Linear(),
                         paramsel = LOOCV(),
                         rls      = Primal())
