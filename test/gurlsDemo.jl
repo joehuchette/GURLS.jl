@@ -10,9 +10,9 @@ ntrain = round(n*3/4)
 randp = randperm(n)
 
 xTrain = convert(Matrix{Float64}, array(titanicDF[randp[1:ntrain],2:end]))
-yTrain = convert(Vector{Float64}, array(titanicDF[randp[1:ntrain],1]))
+yTrain = convert(Matrix{Float64}, array(titanicDF[randp[1:ntrain],1]))
 xTest  = convert(Matrix{Float64}, array(titanicDF[randp[ntrain+1:end],2:end]))
-yTest  = convert(Vector{Float64}, array(titanicDF[randp[ntrain+1:end],1]))
+yTest  = convert(Matrix{Float64}, array(titanicDF[randp[ntrain+1:end],1]))
 
 xMeans = mean(xTrain,1)
 for i in 1:size(xTrain,1)

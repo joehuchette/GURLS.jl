@@ -40,6 +40,9 @@ ex = Experiment(dual, pred, perf)
 res = process(ex)
 m = res[dual].model
 
+println(typeof(m))
+println(typeof(xTest))
+
 pred = sign(predict(m,xTest))
 nCorrect = sum(pred .== yTest)
 println("Gaussian: $(100*nCorrect/size(xTest,1))%")
