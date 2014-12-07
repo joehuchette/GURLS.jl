@@ -3,23 +3,29 @@ using GURLS
 using DataFrames
 using RDatasets
 
-titanicDF = dataset("count","titanic")
+titanicDF = dataset("COUNT","titanic")
 n = size(titanicDF,1)
 ntrain = round(n*3/4)
 
 randp = randperm(n)
 
 xTrain = convert(Matrix{Float64}, array(titanicDF[randp[1:ntrain],2:end]))
-yTrain = convert(Matrix{Float64}, array(titanicDF[randp[1:ntrain],1]))
+yTrain = convert(Vector{Float64}, array(titanicDF[randp[1:ntrain],1]))
 xTest  = convert(Matrix{Float64}, array(titanicDF[randp[ntrain+1:end],2:end]))
-yTest  = convert(Matrix{Float64}, array(titanicDF[randp[ntrain+1:end],1]))
+yTest  = convert(Vector{Float64}, array(titanicDF[randp[ntrain+1:end],1]))
 
 xMeans = mean(xTrain,1)
 for i in 1:size(xTrain,1)
 	xTrain[i,:] -= xMeans
+	if yTrain[i]==0
+		yTrain[i] = -1
+	end
 end
 for i in 1:size(xTest,1)
 	xTest[i,:] -= xMeans
+	if yTest[i]==0
+		yTest[i] = -1
+	end
 end
 
 dual = Training(xTrain, yTrain, kernel = Gaussian(), rls = Dual())

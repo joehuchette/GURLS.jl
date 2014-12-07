@@ -7,14 +7,13 @@ n = size(eyedata,1)
 randp = randperm(n)
 
 #14980 possible points in the data set
-ntrain = 300
-ntest = 100
+ntrain = 1000
+ntest = 1000
 
 xTrain = convert(Matrix{Float64}, eyedata[randp[1:ntrain],1:end-1])
 yTrain = convert(Vector{Float64}, eyedata[randp[1:ntrain],end])
 xTest  = convert(Matrix{Float64}, eyedata[randp[ntrain+1:ntrain+ntest],1:end-1])
 yTest  = convert(Vector{Float64}, eyedata[randp[ntrain+1:ntrain+ntest],end])
-
 
 xMeans = mean(xTrain,1)
 for i in 1:size(xTrain,1)
@@ -30,19 +29,18 @@ for i in 1:size(xTest,1)
 	end
 end
 
-print(yTrain)
-print(yTest)
+dual = Training(xTrain, yTrain, kernel = Gaussian(), rls = Dual())
+pred = Prediction(dual, xTest)
+perf = Performance(pred, yTest, MacroAvg())
 
-primal = Training(xTrain, yTrain, kernel = Linear(), rls = Primal())
-dual   = Training(xTrain, yTrain, kernel = Linear(), rls = Dual())
-primalpred = Prediction(primal, xTest)
-dualpred   = Prediction(dual,   xTest)
-primalperf = Performance(primalpred, yTest, MacroAvg())
-dualperf   = Performance(dualpred,   yTest, MacroAvg())
-
-ex = Experiment(primal, dual, primalpred, dualpred, primalperf, dualperf)
+ex = Experiment(dual, pred, perf)
 
 res = process(ex)
+m = res[dual].model
 
-println("Primal Performance: $(res[primalperf])")
-println("Dual   Performance: $(res[dualperf])")
+println(typeof(m))
+println(typeof(xTest))
+
+pred = sign(predict(m,xTest))
+nCorrect = sum(pred .== yTest)
+println("Gaussian: $(100*nCorrect/size(xTest,1))%")
