@@ -3,7 +3,7 @@ using GURLS
 
 eyedata = readcsv(Pkg.dir("GURLS") * "/data/EyeState.csv")
 
-function run_big_gaussian()
+function test_big_gaussian()
 
 	n = size(eyedata,1)
 	randp = randperm(n)
@@ -38,14 +38,8 @@ function run_big_gaussian()
 	ex = Experiment(dual, pred, perf)
 
 	@time res = process(ex)
-	m = res[dual].model
 
-	println(typeof(m))
-	println(typeof(xTest))
-
-	pred = sign(predict(m,xTest))
-	nCorrect = sum(pred .== yTest)
-	println("Gaussian: $(100*nCorrect/size(xTest,1))%")
+	println("Gaussian: $(100*res[perf])%")
 end
 
 run_big_gaussian()

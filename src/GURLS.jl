@@ -12,7 +12,8 @@ export AbstractProcess,
        Training, Prediction, Performance, Confidence,
        Perf, MacroAvg, RMSE, AbsErr, 
        Conf,
-       process, predict, train
+       process, predict, train,
+       macroavg, rmse, abserr
 
 ###############################################################################
 # AbstractProcess: Abstract type for a process in the experiment 
