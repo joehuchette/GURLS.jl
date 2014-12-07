@@ -1,27 +1,20 @@
 importall Distances
 
-function buildKernel(train::Training{Linear,LOOCV,Dual})
-	k = train.X * train.X'
-	return k
-end
+buildKernel(train::Training{Linear,LOOCV,Dual}) = train.X * train.X'
 
 function buildKernel{G<:Gaussian}(train::Training{G,LOOCV,Dual},sigma)
 	denom = 2 * sigma ^ 2
 
-	train.kernel.k = exp(-train.kernel.dists./denom)
+	train.kernel.k = exp(-train.kernel.dists ./ denom)
 
 	return train.kernel.k
 end
 
 function buildCrossXKernel{R<:Real}(model::GaussianModel,X::Array{R,2})
-	
 	denom = 2 * model.sigma ^ 2
 
 	k = pairwise(SqEuclidean(),X',model.X')
-
-	k = exp(-k./denom)
-
-	return k
+	return exp(-k./denom)
 end
 
 
