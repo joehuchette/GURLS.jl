@@ -66,7 +66,7 @@ function validateDual(Q,L,Qy,lambda,y::Matrix)
 end
 
 
-function validatePrimal(LEFT,RIGHT,L,lambda,y)
+function validatePrimal(LEFT,RIGHT,L,lambda,y::Vector)
 	# Computes sum of square LOOE given the singular value decomposition of the
 	# kernel matrix
 	# 
@@ -80,21 +80,30 @@ function validatePrimal(LEFT,RIGHT,L,lambda,y)
 	# -perfT: 1xT 2d-array of sum of square LOOE per class
 
 	n, T = size(y,1), size(y,2)
+	d1, d2 = size(LEFT,1), size(LEFT,2)
+	@assert d1 == n
 
-	LL = diagm((L + (n*lambda)).^(-1))
-	num = y - LEFT*LL*RIGHT
-	den = zeros(n,1)
-
-	for j = 1:n
-		den[j] = 1.0 - 	(LEFT[j,:]*LL*LEFT[j,:]')[1]
+	# LL = diagm((L + (n*lambda)).^(-1))
+	# num = y - LEFT*LL*RIGHT
+	num = copy(y)
+	for i in 1:d1
+		for j in 1:d2
+			@inbounds num[i] -= LEFT[i,j] * RIGHT[j] / (L[j] + (n*lambda))
+		end
 	end
 
-	perf = zeros(n,T)
-	for t = 1:T
-		perf[:,t] = num[:,t]./den
+	den = fill(1.0, n)
+
+	for j in 1:n
+		for k in 1:d2
+			@inbounds den[j] -= L[k] * LEFT[j,k]^2 
+		end
 	end
 
-	perfT = sum(perf.^2,1)
+	perfT = 0.0
+	for i in 1:n
+		@inbounds perfT += (num[i] / den[i])^2
+	end
 
 	return perfT
 end

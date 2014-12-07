@@ -7,8 +7,8 @@ n = size(eyedata,1)
 randp = randperm(n)
 
 #14980 possible points in the data set
-ntrain = 300
-ntest = 100
+ntrain = 13000
+ntest = 1000
 
 xTrain = convert(Matrix{Float64}, eyedata[randp[1:ntrain],1:end-1])
 yTrain = convert(Vector{Float64}, eyedata[randp[1:ntrain],end])
@@ -34,15 +34,16 @@ print(yTrain)
 print(yTest)
 
 primal = Training(xTrain, yTrain, kernel = Linear(), rls = Primal())
-dual   = Training(xTrain, yTrain, kernel = Linear(), rls = Dual())
+# dual   = Training(xTrain, yTrain, kernel = Linear(), rls = Dual())
 primalpred = Prediction(primal, xTest)
-dualpred   = Prediction(dual,   xTest)
+# dualpred   = Prediction(dual,   xTest)
 primalperf = Performance(primalpred, yTest, MacroAvg())
-dualperf   = Performance(dualpred,   yTest, MacroAvg())
+# dualperf   = Performance(dualpred,   yTest, MacroAvg())
 
-ex = Experiment(primal, dual, primalpred, dualpred, primalperf, dualperf)
+ex = Experiment(primal, primalpred, primalperf)
+# ex = Experiment(primal, dual, primalpred, dualpred, primalperf, dualperf)
 
 res = process(ex)
 
 println("Primal Performance: $(res[primalperf])")
-println("Dual   Performance: $(res[dualperf])")
+# println("Dual   Performance: $(res[dualperf])")
