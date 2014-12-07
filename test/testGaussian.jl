@@ -37,7 +37,6 @@ ex = Experiment(dual, pred, perf)
 
 #Processes all of the tasks defined in the given Experiment in order.
 res = process(ex)
-
 m = res[dual].model
 
 println(typeof(m))
