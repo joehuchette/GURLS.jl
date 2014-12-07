@@ -68,7 +68,7 @@ function process{Kern<:Kernel}(train::Training{Kern,LOOCV,Dual})
 		i = 1
 		for lambda in guesses
 			performance[i,j] = validateDual(Q,L,Qy,lambda,train.y)[1]
-			# println(performance[i])
+			println(performance[i])
 			i += 1
 		end
 

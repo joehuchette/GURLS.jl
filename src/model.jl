@@ -1,10 +1,6 @@
 # Abstract type to hold sufficient statistics to describe our model. 
 abstract AbstractModel <: AbstractResults
 
-# Catch-all to generate errors if we get ahead of ourselves
-predict{T<:AbstractModel}(model::T) =
- error("Predict not implemented for models of type $(typeof(model)).")
-
 ##############################################################################
 # Linear model definition and building
 type LinearModel{T<:Real} <: AbstractModel
@@ -46,7 +42,7 @@ function getC{R<:Real,Kern<:Kernel,P<:Paramsel}(train::Training{Kern,P,Dual},lam
 	c = kFact\(kFact'\train.y)
 
 	return vec(c)
-end
+end   
 
 process(p::Prediction, results) = predict(results[p.training].model, p.X)
 
@@ -54,17 +50,17 @@ process(p::Prediction, results) = predict(results[p.training].model, p.X)
 # Gaussian model definition and building
 
 type GaussianModel{T<:Real} <: AbstractModel
-	c::Array{T,1} 
+	c::Array{T,1}
+	X::Array{T,2}
 	sigma::Real
 end
 
-function predict(model::GaussianModel,X)
-	t = Training(X,ones(size(X,1)),kernel = Gaussian(), rls = Dual())
-	k = buildKernel(t,model.sigma)
+function predict(model::AbstractModel,X)
+	k = buildCrossXKernel(model,X)
 	return k * model.c
 end
 
 function buildModel{P<:Paramsel,R<:Real}(train::Training{Gaussian,P,Dual},lambda::Real,K::Array{R,2},sigma)
-	return GaussianModel(getC(train,lambda,K),sigma)
+	return GaussianModel(getC(train,lambda,K),train.X,sigma)
 end
 
