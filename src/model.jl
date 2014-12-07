@@ -50,7 +50,7 @@ end
 
 function predict(model::AbstractModel,X)
 	k = buildCrossXKernel(model, X)
-	return k * model.c
+	return model.c' * X
 end
 
 buildModel{P<:Paramsel,R<:Real}(train::Training{Gaussian,P,Dual}, lambda::Real, K::Array{R,2}, sigma) = 

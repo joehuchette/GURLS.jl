@@ -46,7 +46,8 @@ type Gaussian <: Kernel
     nLambda::Int
     nSigma::Int
 end
-Gaussian() = Gaussian(100,5)
+
+Gaussian() = Gaussian(20,26)
 
 num_lambda(a::Linear) = a.nLambda
 num_lambda(a::Gaussian) = a.nLambda
