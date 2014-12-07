@@ -45,9 +45,11 @@ Linear() = Linear(100)
 type Gaussian <: Kernel
     nLambda::Int
     nSigma::Int
+    k::Array{Real,2}
+    dists::Array{Real,2}
 end
 
-Gaussian() = Gaussian(20,26)
+Gaussian() = Gaussian(20,26,zeros(1,1),zeros(1,1))
 
 num_lambda(a::Linear) = a.nLambda
 num_lambda(a::Gaussian) = a.nLambda
