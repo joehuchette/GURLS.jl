@@ -43,14 +43,16 @@ process(p::Prediction, results) = predict(results[p.training].model, p.X)
 # Gaussian model definition and building
 
 type GaussianModel{T<:Real} <: AbstractModel
-	c::Array{T,1}
-	X::Array{T,2}
+	c::Vector{T}
+	X::Matrix{T}
 	sigma::Real
 end
 
 function predict(model::AbstractModel,X)
 	k = buildCrossXKernel(model, X)
-	return k * model.c''
+	c = model.c
+	s1, s2 = size(c,1), size(c,2)
+	return k * reshape(model.c, (s1,s2))
 end
 
 buildModel{G<:Gaussian,P<:Paramsel,R<:Real}(train::Training{G,P,Dual}, lambda::Real, K::Array{R,2}, sigma) = 
