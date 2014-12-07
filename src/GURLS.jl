@@ -4,7 +4,7 @@ importall Base
 
 export AbstractProcess, Experiment, AbstractTask, Kernel, Linear, Gaussian, 
        RLS, LOOCV, Primal, Dual,
-       Training, Prediction, MacroAvg, Performance, Confidence,
+       Training, Prediction, Performance, MacroAvg, RMSE, AbsErr, Confidence,
        process, predict, train
 
 ###############################################################################
@@ -58,6 +58,8 @@ type LOOCV <: Paramsel end
 abstract Pred <: AbstractTask
 abstract Perf <: AbstractTask
 type MacroAvg <: Perf end
+type RMSE <: Perf end
+type AbsErr <: Perf end
 abstract Conf <: AbstractTask
 
 ###############################################################################
