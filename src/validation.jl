@@ -69,7 +69,7 @@ function validatePrimal(LEFT,RIGHT,L,lambda,y)
 	# OUTPUT:
 	# -perfT: 1xT 2d-array of sum of square LOOE per class
 
-	n, T = size(y)
+	n, T = size(y,1), size(y,2)
 
 	LL = diagm((L + (n*lambda)).^(-1))
 	num = y - LEFT*LL*RIGHT
