@@ -45,3 +45,4 @@ function test_gaussian()
 end
 
 test_gaussian()
+test_gaussian()

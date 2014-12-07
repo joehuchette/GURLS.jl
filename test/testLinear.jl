@@ -35,13 +35,16 @@ function test_linear()
 	dualperf   = Performance(dualpred,   yTest, MacroAvg())
 
 	#Form experiment, a series of tasks to be performed.
-	ex = Experiment(primal, dual, primalpred, dualpred, primalperf, dualperf)
+	exprimal = Experiment(primal, primalpred, primalperf)
+	exdual   = Experiment(dual, dualpred, dualperf)
 
 	#Processes all of the tasks defined in the given Experiment in order.
-	@time res = process(ex)
+	@time resp = process(exprimal)
+	@time resd = process(exdual)
 
-	println("Primal Performance: $(res[primalperf])")
-	println("Dual   Performance: $(res[dualperf])")
+	println("Primal Performance: $(resp[primalperf])")
+	println("Dual   Performance: $(resd[dualperf])")
 end
 
+test_linear()
 test_linear()
