@@ -8,7 +8,7 @@ df = dataset("COUNT","titanic")
 # Switch to -1,1 classification data
 df[:Survived] = (df[:Survived] - 0.5) * 2
 
-# Build the model. Uses R-like sytax for model building.
+# Build the model. Uses R-like syntax for model building.
 model = train(Survived ~ Age + Sex + Class, data = df, kernel = Linear(),
 													 validation = LOOCV(),
 													 method = Primal())
