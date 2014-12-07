@@ -1,8 +1,8 @@
 importall DataFrames
 
-type Model <: AbstractResults
+type Model{T} <: AbstractResults
 	innerModel::AbstractResults
-	xMean::Array{Real,1}
+	xMean::Array{T,1}
 	yMean::Real
 	formula::Formula
 end
@@ -30,7 +30,7 @@ function train(model::Formula; data = [], kernel = Linear(), validation = LOOCV(
 
 	res = process(ex)
 
-	return Model(res[1].model,xMean,yMean,formula), res[1]
+	return Model(res[tr].model,xMean,yMean,formula), res[tr]
 end
 
 function predict(model::Model,data::DataFrame)
@@ -39,12 +39,10 @@ function predict(model::Model,data::DataFrame)
 	x = modelMatrix.m[:,2:end] # get the data out of this, but ignore offset term.
 
 	for i in 1:size(x,1)
-		x[i,:] -= xMean'' #double transpose to make row vector
+		x[i,:] -= model.xMean'' #double transpose to make row vector
 	end
 
 	y = predict(model.innerModel,x)
 
-	y += yMean
-
-	return y
+	return y += model.yMean
 end

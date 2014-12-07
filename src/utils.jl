@@ -1,6 +1,6 @@
 
 
-function GInverseDiagonal(Q,L,lambda)
+function GInverseDiagonal(Q, L, lambda)
 	n = size(Q,1)
 	t = size(lambda,2)
 	Z = zeros(n,t)
@@ -15,7 +15,7 @@ function GInverseDiagonal(Q,L,lambda)
 	return Z	
 end
 
-function square_distance(a,b)
+function square_distance(a, b)
 	# SQUARE_DISTANCE - computes Euclidean SQUARED distance matrix
 	# E = distance(A,B)
 	#
@@ -29,15 +29,15 @@ function square_distance(a,b)
 		error("A and B should be of same dimensionality")
 	end
 
-	aa=sum(a.*a,1)
-	bb=sum(b.*b,1)
+	aa=sum(a.*a, 1)
+	bb=sum(b.*b, 1)
 	ab=a'*b;
 	d = (abs(repmat(aa',1,size(bb,2)) + repmat(bb,size(aa,2),1) - 2*ab))
 
 end
 
 
-function rls_eigen(Q,L,Qy,lambda,n)
+function rls_eigen(Q, L, Qy, lambda, n)
 	# Computes RLS estimator given the singular value decomposition of the
 	# kernel matrix
 	# 

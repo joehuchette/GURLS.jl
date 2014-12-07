@@ -2,9 +2,16 @@ module GURLS
 
 importall Base
 
-export AbstractProcess, Experiment, AbstractTask, Kernel, Linear, Gaussian, 
-       RLS, LOOCV, Primal, Dual,
-       Training, Prediction, Performance, MacroAvg, RMSE, AbsErr, Confidence,
+export AbstractProcess, 
+       AbstractTask, 
+       AbstractResults,
+       Experiment, 
+       Kernel, Linear, Gaussian, 
+       Paramsel, LOOCV,
+       RLS, Primal, Dual,
+       Training, Prediction, Performance, Confidence,
+       Perf, MacroAvg, RMSE, AbsErr, 
+       Conf,
        process, predict, train
 
 ###############################################################################
@@ -29,15 +36,16 @@ abstract AbstractTask
 ###############################################################################
 # Kernel: Kernel type used in prediction
 abstract Kernel <: AbstractTask
+
 type Linear <: Kernel 
     nLambda::Int
 end
 Linear() = Linear(100)
+
 type Gaussian <: Kernel
     nLambda::Int
     nSigma::Int
 end
-
 Gaussian() = Gaussian(100,5)
 
 num_lambda(a::Linear) = a.nLambda
@@ -114,9 +122,6 @@ type Confidence{Conf} <: AbstractProcess
 end
 Confidence(pred::Prediction, conf::Conf) = Confidence{Conf}(pred)
 
-get_options(::Gaussian,::LOOCV,::Dual) =
-	GaussianOptions(20,25)
-
 ##############################################################################
 # Type to hold the results of an abstract process
 abstract AbstractResults
@@ -133,7 +138,6 @@ Base.show(io::IO,res::AbstractResults) = print(io,res)
 
 ##############################################################################
 # Main routine that processes an experiment.
-process(e::Experiment) = map(process, e.pipeline)
 function process(e::Experiment)
     res = Dict{AbstractProcess,Any}()
     for proc in e.pipeline
@@ -142,8 +146,8 @@ function process(e::Experiment)
     return res
 end
 
-# Catch-all for undefined processes
-process(a,b) = process(a)
+# Catch-alls
+process(a,_) = process(a)
 process(task) = error("Operation not defined for type $(typeof(task)).")
 
 include("utils.jl")
@@ -153,7 +157,7 @@ include("validation.jl")
 include("paramsel.jl")
 include("performance.jl")
 include("legacy.jl")
-# include("RInterface.jl")
+include("RInterface.jl")
 
 ##############################################################################
 

@@ -9,27 +9,22 @@ end
 ##############################################################################
 
 function process(train::Training{Linear,LOOCV,Primal})
-	XX = train.X' * train.X
-	Xy = train.X' * train.y
-	(n,d) = size(train.X)
+	X, y = train.X, train.y
+	XX = X' * X
+	Xy = X' * y
+	n, d = size(X)
+	nlambda = num_lambda(train.kernel)
 
-	(L,Q) = eig(XX)
+	L, Q = eig(XX)
 
-	guesses = getLambdaGuesses(L,min(n,d),n,num_lambda(train.kernel))
+	guesses = getLambdaGuesses(L, min(n,d), n, nlambda)
 
-	LEFT = train.X * Q
+	LEFT  = X * Q
 	RIGHT = Q' * Xy
 
-	# pre-allocate memory
-	performance = zeros(num_lambda(train.kernel))
-
 	# Test all values for lambda
-	i = 1
-	for lambda in guesses
-		# performance[i] = validate(train,lambda)
-		performance[i] = validatePrimal(LEFT,RIGHT,L,lambda,train.y)[1]
-		# println(performance[i])
-		i += 1
+	performance = map(guesses) do lambda 
+		validatePrimal(LEFT, RIGHT, L, lambda, y)[1]
 	end
 
 		# Find the best value for lambda
@@ -37,20 +32,21 @@ function process(train::Training{Linear,LOOCV,Primal})
 	lambdaBest = guesses[best]
 
 	# Build the final model-- might as well use all of the training set.
-	model = buildModel(train,lambdaBest)
+	model = buildModel(train, lambdaBest)
 
-	return ParamselResults(model,guesses,performance')
+	return ParamselResults(model,guesses, performance')
 end
 
 
 function process{Kern<:Kernel}(train::Training{Kern,LOOCV,Dual})
 
-	(n,d) = size(train.X)
+	n, d = size(train.X)
+	nlambda = num_lambda(train.kernel)
 
 	kernelSpace = getKernelSpace(train)
 
 	# pre-allocate memory
-	performance = zeros(num_lambda(train.kernel),length(kernelSpace))
+	performance = zeros(nlambda, length(kernelSpace))
 	lambdaBests = zeros(length(kernelSpace))
 	j = 1
 	for kernArgs in kernelSpace
@@ -62,7 +58,7 @@ function process{Kern<:Kernel}(train::Training{Kern,LOOCV,Dual})
 		r = rank(train.X)
 		Qy = Q' * train.y
 
-		guesses = getLambdaGuesses(L,r,n,num_lambda(train.kernel))
+		guesses = getLambdaGuesses(L,r,n,nlambda)
 
 		# Test all values for lambda
 		i = 1
@@ -79,7 +75,7 @@ function process{Kern<:Kernel}(train::Training{Kern,LOOCV,Dual})
 		j += 1
 	end
 
-	_,best = findmin(min(performance,1)) # find best value for kernArgs
+	_, best = findmin(min(performance,1)) # find best value for kernArgs
 
 	# Need to build nonlinear kernels. Also record what kernargs we're using
 	if Kern != Linear
@@ -97,14 +93,14 @@ function process{Kern<:Kernel}(train::Training{Kern,LOOCV,Dual})
 
 end
 
-function getLambdaGuesses(eig,rank,n,nLambda)
+function getLambdaGuesses(eig, rank, n, nLambda)
 # Figure out the lambdas we need to search -- based off of paramsel_lambdaguess.m
 
-	eigs = sort(eig,rev = true) # pass by reference, and order matters for later use. 
+	eigs = sort(eig, rev=true) # pass by reference, and order matters for later use. 
 	lmax = eigs[1]
-	lmin = max(min(lmax * 1e-8, eigs[rank]),200*sqrt(eps()))
+	lmin = max(min(lmax * 1e-8, eigs[rank]), 200*sqrt(eps()))
 
-	powers = linspace(0,1,nLambda)
+	powers = linspace(0, 1, nLambda)
 	guesses = lmin.*(lmax/lmin).^(powers)
 
 	return guesses / n
