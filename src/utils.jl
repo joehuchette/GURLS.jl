@@ -1,11 +1,11 @@
 
 
-function GInverseDiagonal(Q, L, lambda)
+function GInverseDiagonal(Q::Matrix{Float64}, L, lambda)
 	n = size(Q,1)
 	t = size(lambda,2)
-	Z = zeros(n,t)
+	Z = zeros(Float64, n, t)
 
-	D = Q.^(2)
+	D = Q .^ 2
 	for i = 1:t
 	    d = L + (n*lambda[i])
 	    d = 1 ./ d
@@ -37,7 +37,7 @@ function square_distance(a, b)
 end
 
 
-function rls_eigen(Q, L, Qy, lambda, n)
+function rls_eigen(Q::Matrix{Float64}, L::Vector{Float64}, Qy::Vector{Float64}, lambda, n)
 	# Computes RLS estimator given the singular value decomposition of the
 	# kernel matrix
 	# 
@@ -52,8 +52,8 @@ function rls_eigen(Q, L, Qy, lambda, n)
 	# OUTPUT:
 	# -C: rls coefficient vector
 
-	L = L + n*lambda;
-	L = diagm(1 ./ L);
-	C = (Q*L)*Qy;
+	L = L + n*lambda
+	diagL = diagm(1 ./ L)
+	C = (Q * diagL) * Qy
 	return C
 end

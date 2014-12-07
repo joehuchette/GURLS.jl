@@ -44,11 +44,13 @@ function validateDual(Q,L,Qy,lambda,y)
 	Z = GInverseDiagonal(Q,L,lambda)
 
 	perf = zeros(n,T)
-	for t = 1:T
-		perf[:,t] = C[:,t]./Z
+	for j in 1:T
+		for i in 1:n
+			perf[i,j] = (C[i,j] / Z[i])^2
+		end
 	end
 
-	perfT = sum(perf.^2,1)
+	perfT = sum(perf,1)
 
 	return perfT
 end

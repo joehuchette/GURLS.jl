@@ -9,10 +9,10 @@ ntrain = round(n*3/4)
 
 randp = randperm(n)
 
-xTrain = convert(Array{Float64,2}, array(titanicDF[randp[1:ntrain],2:end]))
-yTrain = convert(Array{Float64,1}, array(titanicDF[randp[1:ntrain],1]))
-xTest  = convert(Array{Float64,2}, array(titanicDF[randp[ntrain+1:end],2:end]))
-yTest  = convert(Array{Float64,1}, array(titanicDF[randp[ntrain+1:end],1]))
+xTrain = convert(Matrix{Float64}, array(titanicDF[randp[1:ntrain],2:end]))
+yTrain = convert(Vector{Float64}, array(titanicDF[randp[1:ntrain],1]))
+xTest  = convert(Matrix{Float64}, array(titanicDF[randp[ntrain+1:end],2:end]))
+yTest  = convert(Vector{Float64}, array(titanicDF[randp[ntrain+1:end],1]))
 
 xMeans = mean(xTrain,1)
 for i in 1:size(xTrain,1)
@@ -29,8 +29,5 @@ perf = Performance(pred, yTest, MacroAvg())
 ex = Experiment(dual, pred, perf)
 
 res = process(ex)
-m = res[dual].model
 
-pred = sign(predict(m,xTest))
-nCorrect = sum(pred .== yTest)
-println("Gaussian: $(100*nCorrect/size(xTest,1))%")
+println("Gaussian: $(100*res[perf])%")
