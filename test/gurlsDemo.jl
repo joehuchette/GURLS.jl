@@ -1,39 +1,21 @@
 #A demo of our GURLS implementation on standard datasets
+using RDatasets
 using GURLS
 using DataFrames
-using RDatasets
 
-titanicDF = dataset("COUNT","titanic")
-n = size(titanicDF,1)
-ntrain = round(n*3/4)
+df = dataset("COUNT","titanic")
 
-randp = randperm(n)
+# Switch to -1,1 classification data
+df[:Survived] = (df[:Survived] - 0.5) * 2
 
-xTrain = convert(Matrix{Float64}, array(titanicDF[randp[1:ntrain],2:end]))
-yTrain = convert(Vector{Float64}, array(titanicDF[randp[1:ntrain],1]))
-xTest  = convert(Matrix{Float64}, array(titanicDF[randp[ntrain+1:end],2:end]))
-yTest  = convert(Vector{Float64}, array(titanicDF[randp[ntrain+1:end],1]))
+# Build the model. Uses R-like syntax for model building.
+model = train(Survived ~ Age + Sex + Class, data = df, kernel = Linear(),
+													 validation = LOOCV(),
+													 method = Primal())
 
-xMeans = mean(xTrain,1)
-for i in 1:size(xTrain,1)
-	xTrain[i,:] -= xMeans
-	if yTrain[i]==0
-		yTrain[i] = -1
-	end
-end
-for i in 1:size(xTest,1)
-	xTest[i,:] -= xMeans
-	if yTest[i]==0
-		yTest[i] = -1
-	end
-end
+# Use our model to predict titanic deaths.
+preds = predict(model,df)
 
-dual = Training(xTrain, yTrain, kernel = Gaussian(), rls = Dual())
-pred = Prediction(dual, xTest)
-perf = Performance(pred, yTest, MacroAvg())
-
-ex = Experiment(dual, pred, perf)
-
-@time res = process(ex)
-
-println("Gaussian: $(100*res[perf])%")
+# Evaluate our accuracy
+accuracy = macroavg(preds,df[:Survived])
+println("$accuracy % Correct!")
