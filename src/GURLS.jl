@@ -42,11 +42,11 @@ type Linear <: Kernel
 end
 Linear() = Linear(100)
 
-type Gaussian <: Kernel
+type Gaussian{T<:Real} <: Kernel
     nLambda::Int
     nSigma::Int
-    k::Array{Real,2}
-    dists::Array{Real,2}
+    k::Array{T,2}
+    dists::Array{T,2}
 end
 
 Gaussian() = Gaussian(20,26,zeros(1,1),zeros(1,1))

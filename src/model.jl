@@ -53,6 +53,6 @@ function predict(model::AbstractModel,X)
 	return k * model.c''
 end
 
-buildModel{P<:Paramsel,R<:Real}(train::Training{Gaussian,P,Dual}, lambda::Real, K::Array{R,2}, sigma) = 
+buildModel{G<:Gaussian,P<:Paramsel,R<:Real}(train::Training{G,P,Dual}, lambda::Real, K::Array{R,2}, sigma) = 
 	GaussianModel(getC(train,lambda,K),train.X,sigma)
 

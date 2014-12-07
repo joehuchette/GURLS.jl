@@ -5,7 +5,7 @@ function buildKernel(train::Training{Linear,LOOCV,Dual})
 	return k
 end
 
-function buildKernel(train::Training{Gaussian,LOOCV,Dual},sigma)
+function buildKernel{G<:Gaussian}(train::Training{G,LOOCV,Dual},sigma)
 	denom = 2 * sigma ^ 2
 
 	train.kernel.k = exp(-train.kernel.dists./denom)
@@ -28,7 +28,7 @@ end
 
 getKernelSpace{P<:Paramsel}(train::Training{Linear,P,Dual}) = [()]
 
-function getKernelSpace{P<:Paramsel}(train::Training{Gaussian,P,Dual})
+function getKernelSpace{G<:Gaussian,P<:Paramsel}(train::Training{G,P,Dual})
 	# kerneldistance = square_distance(train.X',train.X')
 	train.kernel.dists = pairwise(SqEuclidean(),train.X',train.X')
 	n = size(train.kernel.dists,1)
