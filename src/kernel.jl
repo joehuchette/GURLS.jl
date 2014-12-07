@@ -7,13 +7,13 @@ function buildKernel(train::Training{Gaussian,LOOCV,Dual},sigma)
 	(n,d) = size(train.X)
 
 	k = zeros(n,n) # malloc
-	coef = 1/(sqrt(2 * pi) * sigma) ^ d
+	# coef = 1/(sqrt(2 * pi) * sigma) ^ d
 	denom = 2 * sigma ^ 2
 
 	# Only go over top half 
 	for i in 1:n
 		for j in 1:i
-			k[i,j] = coef * exp(-norm(train.X[i,:] - train.X[j,:])/denom)
+			k[i,j] = exp(-norm(train.X[i,:] - train.X[j,:])/denom)
 		end
 	end
 
@@ -28,12 +28,12 @@ function buildCrossXKernel{R<:Real}(model::GaussianModel,X::Array{R,2})
 
 	out = zeros(nTest,nTrain)
 
-	coef = 1/(sqrt(2 * pi) * model.sigma) ^ d
+	# coef = 1/(sqrt(2 * pi) * model.sigma) ^ d
 	denom = 2 * model.sigma ^ 2
 
 	for i in 1:nTrain
 		for j in 1:nTest
-			out[i,j] =  coef * exp(-norm(model.X[i,:] - X[j,:])/denom)
+			out[i,j] =  exp(-norm(model.X[i,:] - X[j,:])/denom)
 		end
 	end
 
