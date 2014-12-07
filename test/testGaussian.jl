@@ -12,6 +12,11 @@ for i in 1:size(xTrain,1)
 	xTest[i,:] -= xMeans
 end
 
+xTrain = xTrain[1:4,:]
+yTrain = yTrain[1:4,:]
+xTest = xTest[1:4,:]
+yTest = yTest[1:4,:]
+
 dual = Training(xTrain, yTrain, kernel = Gaussian(), rls = Dual())
 pred = Prediction(dual, xTest)
 perf = Performance(pred, yTest, MacroAvg())

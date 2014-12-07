@@ -25,15 +25,13 @@ end
 function buildCrossXKernel{R<:Real}(model::GaussianModel,X::Array{R,2})
 	(nTrain,d) = size(model.X)
 	nTest = size(X,1)
-
 	out = zeros(nTest,nTrain)
-
-	# coef = 1/(sqrt(2 * pi) * model.sigma) ^ d
+	
 	denom = 2 * model.sigma ^ 2
 
-	for i in 1:nTrain
-		for j in 1:nTest
-			out[i,j] =  exp(-norm(model.X[i,:] - X[j,:])/denom)
+	for i in 1:nTest
+		for j in 1:nTrain
+			out[i,j] = exp(-norm(model.X[j,:] - X[i,:])/denom)
 		end
 	end
 

@@ -38,7 +38,7 @@ function validateDual(Q,L,Qy,lambda,y)
 	# OUTPUT:
 	# -perfT: 1xT 2d-array of sum of square LOOE per class
 
-	n, T = size(y)
+	n, T = size(y,1), size(y,2)
 
 	C = rls_eigen(Q,L,Qy,lambda,n)
 	Z = GInverseDiagonal(Q,L,lambda)
