@@ -1,4 +1,3 @@
-Pkg.add("RDatasets")
 using RDatasets
 using GURLS
 
@@ -8,6 +7,6 @@ iris = dataset("datasets","iris")
 # Regress SepalWidth on PetalLength, PetalWidth, and the Interaction between the two
 m = train(SepalWidth ~ PetalLength * PetalWidth,data = iris, kernel = Linear(),
 													 		 validation = LOOCV(),
-													 	     method = Dual()))
+													 	     method = Dual())
 
 res = predict(m,iris)
