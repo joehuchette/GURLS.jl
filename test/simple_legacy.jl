@@ -1,10 +1,10 @@
 # A bare bones test to quickly route out syntax errors
 using GURLS.Legacy
 
-xTrain = readcsv(Pkg.dir("GURLS") * "../data/xTrain.csv")
-yTrain = readcsv(Pkg.dir("GURLS") * "../data/yTrain.csv")
-xTest  = readcsv(Pkg.dir("GURLS") * "../data/xTest.csv")
-yTest  = readcsv(Pkg.dir("GURLS") * "../data/yTest.csv")
+xTrain = readcsv(Pkg.dir("GURLS") * "/data/xTrain.csv")
+yTrain = readcsv(Pkg.dir("GURLS") * "/data/yTrain.csv")
+xTest  = readcsv(Pkg.dir("GURLS") * "/data/xTest.csv")
+yTest  = readcsv(Pkg.dir("GURLS") * "/data/yTest.csv")
 
 xMeans = mean(xTrain,1)
 for i in 1:size(xTrain,1)
