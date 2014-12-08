@@ -16,11 +16,11 @@ function train(model::Formula; data = [], kernel = Linear(), validation = LOOCV(
 
 	y = (data[model.lhs]).data''
 
-	xMean = mean(x,1)
+	xMean = reshape(mean(x,1), (1,size(x,2)))
 	yMean = mean(y)
 
 	for i in 1:size(x,1)
-		x[i,:] -= xMean'' #double transpose to make row vector
+		x[i,:] -= xMean #double transpose to make row vector
 		y[i] -= yMean
 	end
 
