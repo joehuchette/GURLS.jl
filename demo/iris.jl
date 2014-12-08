@@ -1,4 +1,3 @@
-Pkg.add("Resampling")
 using Resampling
 using RDatasets
 using GURLS
