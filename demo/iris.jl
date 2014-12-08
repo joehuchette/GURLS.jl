@@ -1,3 +1,4 @@
+Pkg.add("RDatasets")
 using RDatasets
 using GURLS
 
