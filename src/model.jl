@@ -30,9 +30,14 @@ end
 function getC{R<:Real,Kern<:Kernel,P<:Paramsel}(train::Training{Kern,P,Dual},lambda::Real,K::Array{R,2})
 	n = size(train.X,1)
 
-	K += n * lambda * eye(n)
-	kFact = chol(K)
-	c = kFact \ (kFact' \ train.y)
+	try 
+		K += n * lambda * eye(n)
+		kFact = chol(K)
+		c = kFact \ (kFact' \ train.y)
+	catch # unlucky, non PSD kernel matrix
+		Q,L,V = svd(K)
+		c = rls_eigen(Q,L,Q'*train.y,lambda,n)
+	end
 
 	return vec(c)
 end   
