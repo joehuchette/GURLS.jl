@@ -35,7 +35,7 @@ function getC{R<:Real,Kern<:Kernel,P<:Paramsel}(train::Training{Kern,P,Dual},lam
 		kFact = chol(K)
 		c = kFact \ (kFact' \ train.y)
 	catch # unlucky, non PSD kernel matrix
-		Q,L,V = svd(K)
+		(Q, L, V) = svd(K)
 		c = rls_eigen(Q,L,Q'*train.y,lambda,n)
 	end
 
