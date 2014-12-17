@@ -30,6 +30,7 @@ end
 function getC{R<:Real,Kern<:Kernel,P<:Paramsel}(train::Training{Kern,P,Dual},lambda::Real,K::Array{R,2})
 	n = size(train.X,1)
 
+	c = zeros(n)
 	try 
 		K += n * lambda * eye(n)
 		kFact = chol(K)
