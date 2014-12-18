@@ -68,13 +68,15 @@ function process{Kern<:Kernel}(train::Training{Kern,LOOCV,Dual})
 		i = 1
 		for lambda in guesses
 			performance[i,j] = validateDual(Q,L,Qy,lambda,train.y)
-			# println(performance[i])
+			# println(performance[i,j])
 			i += 1
 		end
 
 		# Find the best value for lambda
 		perf, best = findmin(performance[:,j])
 		lambdaBests[j] = guesses[best]
+
+		# println(kernArgs, "=>", perf)
 
 		j += 1
 	end
