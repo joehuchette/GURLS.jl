@@ -26,9 +26,10 @@ function getKernelSpace{G<:Gaussian,P<:Paramsel}(train::Training{G,P,Dual})
 	train.kernel.dists = pairwise(SqEuclidean(),train.X')
 	n = size(train.kernel.dists,1)
 
-	dists = sort(vec(tril(train.kernel.dists,-1)))[(n^2+n+2)/2:end]
-	sigmamin = dists[round(0.5 + length(dists) * 0.1)]
-	sigmamax = maximum(dists)
+	# dists = sort(vec(tril(train.kernel.dists,-1)))[(n^2+n+2)/2:end]
+	dists = sort(vec(train.kernel.dists))
+	sigmamin = sqrt(dists[round(0.5 + length(dists) * 0.01)])
+	sigmamax = sqrt(maximum(dists))
 
 	if sigmamin <= 0
 		sigmamin = eps();
