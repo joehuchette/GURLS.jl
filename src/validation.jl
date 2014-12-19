@@ -24,11 +24,11 @@ function validateDual{R<:Real}(Q::Matrix{R},L::Vector{R},Qy::Vector{R},lambda::R
 	perf = zeros(n,T)
 	for j in 1:T
 		@simd for i in 1:n
-			@inbounds perf[i,j] = (C[i,j] / Z[i])^2
+			@inbounds perf[i,j] = y[i] - (C[i,j] / Z[i])
 		end
 	end
 
-	return sum(perf,1)[1]
+	return macroavg(perf,y)
 end
 
 

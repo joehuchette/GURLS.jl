@@ -68,12 +68,11 @@ function process{Kern<:Kernel}(train::Training{Kern,LOOCV,Dual})
 		i = 1
 		for lambda in guesses
 			performance[i,j] = validateDual(Q,L,Qy,lambda,train.y)
-			# println(performance[i,j])
 			i += 1
 		end
 
 		# Find the best value for lambda
-		perf, best = findmin(performance[:,j])
+		perf, best = findmax(performance[:,j])
 		lambdaBests[j] = guesses[best]
 
 		# println(kernArgs, "=>", perf)
@@ -81,7 +80,7 @@ function process{Kern<:Kernel}(train::Training{Kern,LOOCV,Dual})
 		j += 1
 	end
 
-	_, best = findmin(minimum(performance,1)) # find best value for kernArgs
+	_, best = findmax(maximum(performance,1)) # find best value for kernArgs
 
 	# Need to build nonlinear kernels. Also record what kernargs we're using
 	if Kern != Linear
@@ -91,6 +90,8 @@ function process{Kern<:Kernel}(train::Training{Kern,LOOCV,Dual})
 	else
 		kernelArgs = ()
 	end
+
+	println(lambdaBests[best])
 
 	# Build the final model-- might as well use all of the training set.
 	model = buildModel(train,lambdaBests[best],K,kernArgs...)
