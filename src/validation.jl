@@ -49,8 +49,13 @@ function validatePrimal(LEFT,RIGHT,L,lambda,y::Vector)
 	d1, d2 = size(LEFT,1), size(LEFT,2)
 	@assert d1 == n
 
-	# LL = diagm((L + (n*lambda)).^(-1))
-	# num = y - LEFT*LL*RIGHT
+	LL = copy(L)
+	@simd for i in 1:length(LL)
+		@inbounds LL[i] += n * lambda
+		@inbounds LL[i] = 1/LL[i]
+	end
+	# LL = (L + (n*lambda)).^(-1)
+
 	num = copy(y)
 	@simd for i in 1:d1
 		for j in 1:d2
@@ -58,20 +63,19 @@ function validatePrimal(LEFT,RIGHT,L,lambda,y::Vector)
 		end
 	end
 
-	den = fill(1.0, n)
-
+	den = ones(n)
 	@simd for j in 1:n
 		for k in 1:d2
-			@inbounds den[j] -= L[k] * LEFT[j,k]^2 
+			@inbounds den[j] -= LL[k] * LEFT[j,k]^2 
 		end
 	end
 
-	perfT = 0.0
+	perfT = zeros(n)
 	@simd for i in 1:n
-		@inbounds perfT += (num[i] / den[i])^2
+		@inbounds perfT[i] += y[i] - (num[i] / den[i])
 	end
 
-	return perfT
+	return macroavg(perfT,y)
 end
 
 

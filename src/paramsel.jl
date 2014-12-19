@@ -27,8 +27,8 @@ function process(train::Training{Linear,LOOCV,Primal})
 		validatePrimal(LEFT, RIGHT, L, lambda, y)[1]
 	end
 
-		# Find the best value for lambda
-	_, best = findmin(performance)
+	# Find the best value for lambda
+	_, best = findmax(performance)
 	lambdaBest = guesses[best]
 
 	# Build the final model-- might as well use all of the training set.
