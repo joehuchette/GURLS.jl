@@ -66,7 +66,7 @@ function validatePrimal(LEFT,RIGHT,L,lambda,y::Vector)
 	den = ones(n)
 	@simd for j in 1:n
 		for k in 1:d2
-			@inbounds den[j] -= LL[k] * LEFT[j,k]^2 
+			@inbounds den[j] -= LL[k] * LEFT[j,k] * LEFT[j,k]
 		end
 	end
 
